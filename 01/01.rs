@@ -1,14 +1,6 @@
-fn parse_hex(hex: &str) -> Vec<u8> {
-    let mut bytes = Vec::new();
-    for i in 0..(hex.len() / 2) {
-        let index = i * 2;
-        match u8::from_str_radix(&hex[index..(index + 2)], 16) {
-            Ok(b) => bytes.push(b),
-            Err(_) => println!("ah shit"),
-        }
-    }
-    bytes
-}
+mod hex;
+
+use hex::parse_hex;
 
 // http://fm4dd.com/programming/base64/base64_algorithm.htm
 // https://stackoverflow.com/questions/10691186/how-do-you-convert-8-bit-bytes-to-6-bit-characters
