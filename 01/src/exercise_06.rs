@@ -3,6 +3,18 @@ use base64::decode; // not gonna roll my own base64 decoder for now
 use std::collections::HashMap;
 use edit_distance::get_edit_distance;
 use read_file::strings_from_filename;
+use single_byte_xor::{guess_single_byte_xor, COMMON_CHARS};
+
+fn transpose_bytes_by_keysize(bytes: &Vec<u8>, keysize: usize) -> Vec<Vec<u8>> {
+    let mut transposed = Vec::new();
+    for i in 0..keysize {
+        transposed.push(Vec::new());
+    }
+    for i in 0..bytes.len() {
+        transposed[i % keysize].push(bytes[i]);
+    }
+    transposed
+}
 
 fn normalized_keysize_score(bytes: &Vec<u8>, keysize: usize) -> f64 {
     // ack, working around my lack of knowledge around how to pass slices as arguments
@@ -51,5 +63,9 @@ fn decode_lines(lines: &Vec<String>) -> Vec<u8> {
 pub fn run_06() {
     let lines = strings_from_filename("06.txt");
     let bytes = decode_lines(&lines);
-    println!("{:?}", try_keysizes(&bytes));
+    let keysizes = try_keysizes(&bytes);
+    let transposed = transpose_bytes_by_keysize(&bytes, keysizes.0);
+    for single_byte in transposed {
+        println!("{}", guess_single_byte_xor(&single_byte, COMMON_CHARS[0]));
+    }
 }

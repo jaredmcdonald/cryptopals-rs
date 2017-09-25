@@ -37,12 +37,17 @@ fn guess_xor(frequencies: &Vec<&u8>, guess: &u8) -> u8 {
     frequencies[0] ^ guess
 }
 
-pub const COMMON_CHARS: [u8; 5] = [0x20, 0x45, 0x65, 0x54, 0x74];
+// http://reusablesec.blogspot.com/2009/05/character-frequency-analysis-info.html
+pub const COMMON_CHARS: [u8; 6] = [0x20, 0x61, 0x45, 0x65, 0x54, 0x74];
 
-pub fn guess_single_byte_xor(hex_input: &str, guess: u8) -> String {
+pub fn guess_single_byte_xor_string(hex_input: &str, guess: u8) -> String {
     let bytes = parse_hex(hex_input);
     let frequencies = byte_frequency(&bytes);
     let xor_guess = guess_xor(&frequencies, &guess);
     let decoded = try_xor_by(&bytes, xor_guess);
     bytes_to_ascii_string(&decoded)
+}
+
+pub fn guess_single_byte_xor(bytes: &Vec<u8>, guess: u8) -> u8 {
+    guess_xor(&byte_frequency(&bytes), &guess)
 }
