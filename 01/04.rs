@@ -1,5 +1,6 @@
 mod single_byte_xor;
 mod hex;
+mod ascii;
 
 use std::io::BufReader;
 use std::io::BufRead;

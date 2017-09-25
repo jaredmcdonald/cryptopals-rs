@@ -1,5 +1,6 @@
-use hex::parse_hex;
 use std::collections::HashMap;
+use hex::parse_hex;
+use ascii::bytes_to_ascii_string;
 
 fn try_xor_by(bytes: &Vec<u8>, xor_by: u8) -> Vec<u8> {
     // can't figure out how to just do bytes.map and get the types to work out :/
@@ -35,11 +36,6 @@ fn byte_frequency(bytes: &Vec<u8>) -> Vec<&u8> {
 fn guess_xor(frequencies: &Vec<&u8>, guess: &u8) -> u8 {
     frequencies[0] ^ guess
 }
-
-fn bytes_to_ascii_string(bytes: &Vec<u8>) -> String {
-    bytes.iter().map(|b| *b as char).collect()
-}
-
 
 pub const COMMON_CHARS: [u8; 5] = [0x20, 0x45, 0x65, 0x54, 0x74];
 

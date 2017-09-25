@@ -1,5 +1,6 @@
 mod hex;
 mod single_byte_xor;
+mod ascii;
 use single_byte_xor::{guess_single_byte_xor, COMMON_CHARS};
 
 fn main() {
