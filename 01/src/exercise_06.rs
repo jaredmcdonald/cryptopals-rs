@@ -1,13 +1,17 @@
-extern crate base64;
-use base64::decode; // not gonna roll my own base64 decoder for now
-use std::collections::HashMap;
+extern crate base64; // not gonna roll my own base64 decoder for now
+
+use base64::decode;
+use std::cmp::{Ord, Ordering, PartialEq};
+
 use edit_distance::get_edit_distance;
 use read_file::strings_from_filename;
-use single_byte_xor::most_englishy;
+use repeating_key_xor::repeating_key_xor;
+use ascii::bytes_to_ascii_string;
+use english::{most_englishy, EnglishyInput};
 
 fn transpose_bytes_by_keysize(bytes: &Vec<u8>, keysize: usize) -> Vec<Vec<u8>> {
     let mut transposed = Vec::new();
-    for i in 0..keysize {
+    for _ in 0..keysize {
         transposed.push(Vec::new());
     }
     for i in 0..bytes.len() {
@@ -17,57 +21,100 @@ fn transpose_bytes_by_keysize(bytes: &Vec<u8>, keysize: usize) -> Vec<Vec<u8>> {
 }
 
 fn normalized_keysize_score(bytes: &Vec<u8>, keysize: usize) -> f64 {
-    // ack, working around my lack of knowledge around how to pass slices as arguments
-    let mut first = Vec::new();
-    let mut second = Vec::new();
-    for i in 0..keysize * 2 {
-        if i < keysize {
-            first.push(bytes[i]);
-        } else {
-            second.push(bytes[i]);
-        }
-    }
-    get_edit_distance(&first, &second) as f64 / keysize as f64
+    let first = bytes.get(0..keysize).unwrap().to_vec();
+    let second = bytes.get(keysize..keysize * 2).unwrap().to_vec();
+    let third = bytes.get(keysize * 2..keysize * 3).unwrap().to_vec();
+    let fourth = bytes.get(keysize * 3..keysize * 4).unwrap().to_vec();
+    let average_distance = (get_edit_distance(&first, &second) +
+                            get_edit_distance(&first, &third) +
+                            get_edit_distance(&first, &fourth)) as f64 / 3f64;
+    average_distance / (keysize as f64)
 }
 
-fn try_keysizes(bytes: &Vec<u8>) -> (usize, usize) {
-    // hold onto the lowest few. stupid initial values, should really learn rust better
-    let mut lowest = 99f64;
-    let mut second_lowest = 99f64;
-    let mut lowest_keysize = 99;
-    let mut second_lowest_keysize = 99;
+struct KeysizeScore {
+    pub size: usize,
+    score: f64,
+}
+
+impl Ord for KeysizeScore {
+    fn cmp(&self, other: &KeysizeScore) -> Ordering {
+        self.score.partial_cmp(&other.score).unwrap_or(Ordering::Less)
+    }
+}
+
+impl PartialOrd for KeysizeScore {
+    fn partial_cmp(&self, other: &KeysizeScore) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for KeysizeScore {
+    fn eq(&self, other: &KeysizeScore) -> bool {
+        self.size == other.size && self.score == other.score
+    }
+}
+impl Eq for KeysizeScore {}
+
+fn try_keysizes(bytes: &Vec<u8>) -> Vec<usize> {
+    let mut keysize_scores = Vec::new();
     for keysize in 2..41 {
-        let score = normalized_keysize_score(bytes, keysize);
-        if score < lowest {
-            second_lowest = lowest;
-            second_lowest_keysize = lowest_keysize;
-            lowest = score;
-            lowest_keysize = keysize;
-        } else if score < second_lowest {
-            second_lowest = score;
-            second_lowest_keysize = keysize;
+        let keysize_score = KeysizeScore {
+            score: normalized_keysize_score(bytes, keysize),
+            size: keysize,
+        };
+        match keysize_scores.binary_search(&keysize_score) {
+            Ok(pos) => keysize_scores.insert(pos, keysize_score),
+            Err(pos) => keysize_scores.insert(pos, keysize_score),
         }
     }
-    (lowest_keysize, second_lowest_keysize)
+    keysize_scores.iter().map(|keysize| keysize.size).collect()
 }
 
-fn decode_lines(lines: &Vec<String>) -> Vec<u8> {
+fn flatten_lines(byte_lines: &Vec<Vec<u8>>) -> Vec<u8> {
+    let mut bytes = Vec::new();
+    for byte in byte_lines {
+        bytes.extend(byte);
+    }
+    bytes
+}
+
+fn decode_lines(lines: &Vec<String>) -> Vec<Vec<u8>> {
     let mut bytes = Vec::new();
     for line in lines {
-        // really need to figure out `map` :/
-        bytes.extend(decode(line).unwrap());
+        // really need to figure out `map`, `reduce`, etc :/
+        bytes.push(decode(line).unwrap());
     }
     bytes
 }
 
 pub fn run_06() {
-    let lines = strings_from_filename("06.txt");
-    let bytes = decode_lines(&lines);
-    let keysizes = try_keysizes(&bytes);
-    let transposed = transpose_bytes_by_keysize(&bytes, keysizes.0);
-    for single_byte in transposed {
-        for xor_byte in 0..255 {
-            
+    let line_strings = strings_from_filename("06.txt");
+    let lines = decode_lines(&line_strings);
+    let flattened_bytes = flatten_lines(&lines);
+    let keysizes = try_keysizes(&flattened_bytes).get(0..10).unwrap().to_vec(); // try the first ten :/
+
+    let mut decryption_attempts = Vec::new();
+
+    for keysize in keysizes {
+        let transposed = transpose_bytes_by_keysize(&flattened_bytes, keysize);
+        let mut repeating_key = Vec::new();
+        for transposed_bytes in transposed {
+            let mut possibilities = Vec::new();
+            for xor_key in 0..255 {
+                let key = vec![xor_key];
+                possibilities.push(EnglishyInput {
+                    xor_key: key.to_vec(),
+                    bytes: repeating_key_xor(&transposed_bytes, &key),
+                });
+            }
+            repeating_key.push(most_englishy(&possibilities).xor_key[0]);
         }
+        decryption_attempts.push(EnglishyInput {
+            xor_key: repeating_key.to_vec(),
+            bytes: repeating_key_xor(&flattened_bytes, &repeating_key),
+        });
     }
+
+    let cracked = most_englishy(&decryption_attempts);
+    println!("{}\n\nkey: {:?}", bytes_to_ascii_string(&cracked.bytes), cracked.xor_key);
 }
