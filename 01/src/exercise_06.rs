@@ -3,7 +3,7 @@ use base64::decode; // not gonna roll my own base64 decoder for now
 use std::collections::HashMap;
 use edit_distance::get_edit_distance;
 use read_file::strings_from_filename;
-use single_byte_xor::{guess_single_byte_xor, COMMON_CHARS};
+use single_byte_xor::most_englishy;
 
 fn transpose_bytes_by_keysize(bytes: &Vec<u8>, keysize: usize) -> Vec<Vec<u8>> {
     let mut transposed = Vec::new();
@@ -66,6 +66,8 @@ pub fn run_06() {
     let keysizes = try_keysizes(&bytes);
     let transposed = transpose_bytes_by_keysize(&bytes, keysizes.0);
     for single_byte in transposed {
-        println!("{}", guess_single_byte_xor(&single_byte, COMMON_CHARS[0]));
+        for xor_byte in 0..255 {
+            
+        }
     }
 }
