@@ -16,20 +16,19 @@ pub struct EnglishyResult {
     pub ks_statistic: f64,
 }
 
-pub fn most_englishy(attempts: &Vec<EnglishyInput>) -> EnglishyResult {
+pub fn most_englishy(attempts: &Vec<EnglishyInput>) -> Option<EnglishyResult> {
     let training_text_parsed = ascii_to_bytes(ENGLISH_TRAINING_TEXT);
     let mut lowest_ks_statistic = 1f64;
-    let mut best_result = EnglishyResult { bytes: vec![0u8], xor_key: vec![0u8], ks_statistic: 1f64 };
+    let mut best_result = None;
     for attempt in attempts {
-        // confidence value of 0.1 seems to work well, not entirely clear why
-        let result = test(&training_text_parsed, &attempt.bytes, 0.1);
-        if result.statistic < lowest_ks_statistic {
+        let result = test(&training_text_parsed, &attempt.bytes, 0.999); // oy
+        if result.statistic < lowest_ks_statistic && !result.is_rejected {
             lowest_ks_statistic = result.statistic;
-            best_result = EnglishyResult {
+            best_result = Some(EnglishyResult {
                 bytes: attempt.bytes.to_vec(),
                 ks_statistic: result.statistic,
                 xor_key: attempt.xor_key.to_vec(),
-            };
+            });
         }
     }
     best_result

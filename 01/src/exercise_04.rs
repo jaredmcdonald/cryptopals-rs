@@ -17,8 +17,11 @@ pub fn run_04() {
             });
         }
     }
-    let EnglishyResult { xor_key, bytes, ks_statistic } = most_englishy(&xor_possibilities);
-    println!("Decoded: {}", bytes_to_ascii_string(&bytes));
-    println!("Key: 0x{:02x}", xor_key[0]);
-    println!("K-S statistic: {}", ks_statistic)
+    if let Some(EnglishyResult { xor_key, bytes, ks_statistic }) = most_englishy(&xor_possibilities) {
+        println!("Decoded: {}", bytes_to_ascii_string(&bytes));
+        println!("Key: 0x{:02x}", xor_key[0]);
+        println!("K-S statistic: {}", ks_statistic)
+    } else {
+        println!("blargh! couldn't get anything passing the K-S test");
+    }
 }

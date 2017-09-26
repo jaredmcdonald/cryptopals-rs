@@ -93,9 +93,9 @@ pub fn run_06() {
     let flattened_bytes = flatten_lines(&lines);
     let keysizes = try_keysizes(&flattened_bytes).get(0..10).unwrap().to_vec(); // try the first ten :/
 
-    let mut decryption_attempts = Vec::new();
+    let mut possible_keys = Vec::new();
 
-    for keysize in keysizes {
+    'keysize: for keysize in keysizes {
         let transposed = transpose_bytes_by_keysize(&flattened_bytes, keysize);
         let mut repeating_key = Vec::new();
         for transposed_bytes in transposed {
@@ -107,14 +107,18 @@ pub fn run_06() {
                     bytes: repeating_key_xor(&transposed_bytes, &key),
                 });
             }
-            repeating_key.push(most_englishy(&possibilities).xor_key[0]);
+            if let Some(result) = most_englishy(&possibilities) {
+                repeating_key.push(result.xor_key[0]);
+            } else {
+                // it's probably not this keysize if we couldn't get any to pass,
+                // so skip the rest by continuing the outer loop
+                continue 'keysize;
+            }
         }
-        decryption_attempts.push(EnglishyInput {
-            xor_key: repeating_key.to_vec(),
-            bytes: repeating_key_xor(&flattened_bytes, &repeating_key),
-        });
+        possible_keys.push(repeating_key);
     }
 
-    let cracked = most_englishy(&decryption_attempts);
-    println!("{}\n\nkey: {:?}", bytes_to_ascii_string(&cracked.bytes), cracked.xor_key);
+    for key in possible_keys {
+        println!("Key:{:?}\n\nDecryption attempt:\n{}", key, bytes_to_ascii_string(&repeating_key_xor(&flattened_bytes, &key)));
+    }
 }
