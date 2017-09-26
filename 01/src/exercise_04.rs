@@ -1,9 +1,16 @@
 use read_file::strings_from_filename;
-use single_byte_xor::{guess_single_byte_xor_string, COMMON_CHARS};
-use std::env;
+use single_byte_xor::{most_englishy, single_byte_xor, COMMON_CHARS};
+use ascii::bytes_to_ascii_string;
+use hex::parse_hex;
 
 pub fn run_04() {
-    for hex_string in strings_from_filename("04.txt") {
-        println!("{}", guess_single_byte_xor_string(&hex_string, COMMON_CHARS[0]));
+    let lines = strings_from_filename("04.txt");
+    let parsed_lines: Vec<Vec<u8>> = lines.iter().map(|s| parse_hex(&s)).collect();
+    let mut xor_possibilities: Vec<Vec<u8>> = Vec::new();
+    for line in parsed_lines {
+        for xor_value in 0..255 {
+            xor_possibilities.push(single_byte_xor(&line, xor_value));
+        }
     }
+    println!("{}", bytes_to_ascii_string(&most_englishy(&xor_possibilities).0));
 }

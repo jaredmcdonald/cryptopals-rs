@@ -4,4 +4,5 @@ version = "0.1.0"
 authors = ["Jared McDonald"]
 
 [dependencies]
-base64 = "~0.6.0"
+base64 = "0.6.0"
+kolmogorov_smirnov = "1.1.0"
