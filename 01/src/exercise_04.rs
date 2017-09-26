@@ -17,7 +17,7 @@ pub fn run_04() {
     for result in most_englishy(&xor_possibilities) {
         let EnglishyResult { xor_key, bytes, test_result } = result;
         println!("Decoded: {}", bytes_to_ascii_string(&bytes));
-        println!("Key: {:x}", xor_key);
+        println!("Key: 0x{:02x}", xor_key);
         println!("K-S statistic: {}", test_result.statistic)
     }
 }
