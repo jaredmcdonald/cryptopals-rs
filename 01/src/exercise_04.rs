@@ -1,5 +1,5 @@
 use read_file::strings_from_filename;
-use single_byte_xor::{most_englishy, single_byte_xor, COMMON_CHARS};
+use single_byte_xor::{most_englishy, single_byte_xor};
 use ascii::bytes_to_ascii_string;
 use hex::parse_hex;
 
@@ -12,5 +12,7 @@ pub fn run_04() {
             xor_possibilities.push(single_byte_xor(&line, xor_value));
         }
     }
-    println!("{}", bytes_to_ascii_string(&most_englishy(&xor_possibilities).0));
+    for (bytes, score) in most_englishy(&xor_possibilities) {
+        println!("{}: {}", score, bytes_to_ascii_string(&bytes));
+    }
 }
