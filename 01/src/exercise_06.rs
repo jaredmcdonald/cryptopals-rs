@@ -1,10 +1,8 @@
-extern crate base64; // not gonna roll my own base64 decoder for now
-
-use base64::decode;
 use std::cmp::{Ord, Ordering, PartialEq};
 
 use edit_distance::get_edit_distance;
 use read_file::strings_from_filename;
+use utils::{flatten_lines, decode_base64_lines};
 use repeating_key_xor::repeating_key_xor;
 use ascii::bytes_to_ascii_string;
 use english::{EnglishyInput, get_most_englishy};
@@ -70,26 +68,9 @@ fn try_keysizes(bytes: &Vec<u8>) -> Vec<usize> {
     keysize_scores.iter().map(|keysize| keysize.size).collect()
 }
 
-fn flatten_lines(byte_lines: &Vec<Vec<u8>>) -> Vec<u8> {
-    let mut bytes = Vec::new();
-    for byte in byte_lines {
-        bytes.extend(byte);
-    }
-    bytes
-}
-
-fn decode_lines(lines: &Vec<String>) -> Vec<Vec<u8>> {
-    let mut bytes = Vec::new();
-    for line in lines {
-        // really need to figure out `map`, `reduce`, etc :/
-        bytes.push(decode(line).unwrap());
-    }
-    bytes
-}
-
 pub fn run_06() {
     let line_strings = strings_from_filename("06.txt");
-    let lines = decode_lines(&line_strings);
+    let lines = decode_base64_lines(&line_strings);
     let flattened_bytes = flatten_lines(&lines);
     let keysizes = try_keysizes(&flattened_bytes).get(0..10).unwrap().to_vec(); // try the first ten :/
 

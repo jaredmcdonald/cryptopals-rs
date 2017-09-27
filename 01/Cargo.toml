@@ -5,3 +5,4 @@ authors = ["Jared McDonald"]
 
 [dependencies]
 base64 = "0.6.0"
+openssl = "0.9.19"
