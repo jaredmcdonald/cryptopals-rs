@@ -1,5 +1,4 @@
 extern crate base64;
-extern crate kolmogorov_smirnov;
 
 mod exercise_04;
 mod exercise_05;

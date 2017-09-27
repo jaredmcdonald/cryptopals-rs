@@ -7,7 +7,7 @@ use edit_distance::get_edit_distance;
 use read_file::strings_from_filename;
 use repeating_key_xor::repeating_key_xor;
 use ascii::bytes_to_ascii_string;
-use english::{most_englishy, EnglishyInput};
+use english::{EnglishyInput, get_most_englishy};
 
 fn transpose_bytes_by_keysize(bytes: &Vec<u8>, keysize: usize) -> Vec<Vec<u8>> {
     let mut transposed = Vec::new();
@@ -95,7 +95,7 @@ pub fn run_06() {
 
     let mut possible_keys = Vec::new();
 
-    'keysize: for keysize in keysizes {
+    for keysize in keysizes {
         let transposed = transpose_bytes_by_keysize(&flattened_bytes, keysize);
         let mut repeating_key = Vec::new();
         for transposed_bytes in transposed {
@@ -107,18 +107,21 @@ pub fn run_06() {
                     bytes: repeating_key_xor(&transposed_bytes, &key),
                 });
             }
-            if let Some(result) = most_englishy(&possibilities) {
-                repeating_key.push(result.xor_key[0]);
-            } else {
-                // it's probably not this keysize if we couldn't get any to pass,
-                // so skip the rest by continuing the outer loop
-                continue 'keysize;
-            }
+            let result = get_most_englishy(&possibilities);
+            repeating_key.push(result.xor_key[0]);
         }
         possible_keys.push(repeating_key);
     }
 
+    let mut attempts = Vec::new();
     for key in possible_keys {
-        println!("Key:{:?}\n\nDecryption attempt:\n{}", key, bytes_to_ascii_string(&repeating_key_xor(&flattened_bytes, &key)));
+        attempts.push(EnglishyInput {
+            bytes: repeating_key_xor(&flattened_bytes, &key),
+            xor_key: key,
+        });
     }
+    let best_result = get_most_englishy(&attempts);
+    println!("Key: {:?}", best_result.xor_key);
+    println!("Score: {}", best_result.score);
+    println!("Decrypted text:\n{}", bytes_to_ascii_string(&best_result.bytes));
 }
