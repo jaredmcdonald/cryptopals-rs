@@ -10,7 +10,7 @@ fn count_ones(n: u8) -> u32 {
     count
 }
 
-pub fn get_edit_distance(a: &Vec<u8>, b: &Vec<u8>) -> u32 {
+pub fn get_edit_distance(a: &[u8], b: &[u8]) -> u32 {
     let mut counter = 0u32;
     for i in 0..a.len() {
         counter = counter + count_ones(a[i] ^ b[i]);

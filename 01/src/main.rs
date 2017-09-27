@@ -5,6 +5,7 @@ mod exercise_04;
 mod exercise_05;
 mod exercise_06;
 mod exercise_07;
+mod exercise_08;
 
 mod edit_distance;
 mod ascii;
@@ -13,6 +14,7 @@ mod repeating_key_xor;
 mod hex;
 mod read_file;
 mod utils;
+mod aes;
 
 use std::env::args;
 
@@ -21,6 +23,7 @@ use exercise_04::run_04;
 use exercise_05::run_05;
 use exercise_06::run_06;
 use exercise_07::run_07;
+use exercise_08::run_08;
 
 fn main() {
     if let Some(which_exercise) = args().nth(1) {
@@ -29,6 +32,7 @@ fn main() {
             Ok(5) => run_05(),
             Ok(6) => run_06(),
             Ok(7) => run_07(),
+            Ok(8) => run_08(),
             _ => println!("no such exercise"),
         };
     } else {
