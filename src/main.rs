@@ -16,6 +16,7 @@ mod hex;
 mod read_file;
 mod utils;
 mod aes;
+mod pkcs_7;
 
 use std::env::args;
 
