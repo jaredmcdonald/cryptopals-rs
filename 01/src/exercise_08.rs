@@ -1,25 +1,17 @@
 use read_file::strings_from_filename;
 use hex::parse_hex;
-use edit_distance::get_edit_distance;
-use aes::decrypt_aes_ecb;
+use std::collections::HashSet;
+
+const BLOCK_SIZE: usize = 16;
 
 fn is_aes_encrypted(bytes: &[u8]) -> bool {
-    let keys = [
-        vec![0; 16],
-        vec![1; 16],
-        vec![2; 16],
-        vec![3; 16],
-        vec![4; 16],
-    ];
-
-    // wattttt
-    let decryption_attempts = keys.iter().map(|key| decrypt_aes_ecb(&bytes, key)).collect::<Vec<_>>();
-    let distance_1 = get_edit_distance(&decryption_attempts[0], &decryption_attempts[1]) as i32;
-    let distance_2 = get_edit_distance(&decryption_attempts[1], &decryption_attempts[2]) as i32;
-    let distance_3 = get_edit_distance(&decryption_attempts[2], &decryption_attempts[3]) as i32;
-    let distance_4 = get_edit_distance(&decryption_attempts[3], &decryption_attempts[4]) as i32;
-
-    false
+    let mut blocks = Vec::new();
+    for block_start in 0..bytes.len() / BLOCK_SIZE {
+        // break into blocks
+        blocks.push(bytes[block_start * BLOCK_SIZE..(block_start + 1) * BLOCK_SIZE].to_vec())
+    }
+    let unique: HashSet<_> = blocks.iter().cloned().collect();
+    unique.len() != blocks.len()
 }
 
 pub fn run_08() {
