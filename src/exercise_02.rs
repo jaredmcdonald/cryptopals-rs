@@ -1,14 +1,5 @@
-mod hex;
 use hex::{parse_hex, as_hex};
-
-fn xor_buffers(a: &Vec<u8>, b: &Vec<u8>) -> Vec<u8> {
-    // is there a way to just map this? how to access the byte in b, since map fn doesn't get index?
-    let mut xored = Vec::new();
-    for i in 0..a.len() {
-        xored.push(a[i] ^ b[i]);
-    }
-    xored
-}
+use utils::xor_buffers;
 
 fn fixed_xor(input: &str, xor_by: &str) -> String {
    let parsed_input = parse_hex(input);
@@ -28,6 +19,6 @@ fn test() {
     }
 }
 
-fn main() {
+pub fn run_02() {
     test();
 }

@@ -1,4 +1,5 @@
 use openssl::symm::{Crypter, Cipher, Mode};
+use utils::{as_blocks, xor_buffers};
 
 fn aes_ecb(source: &[u8], key: &[u8], mode: Mode) -> (Vec<u8>, usize) {
     let cipher = Cipher::aes_128_ecb();
@@ -16,6 +17,15 @@ fn aes_ecb(source: &[u8], key: &[u8], mode: Mode) -> (Vec<u8>, usize) {
     }
 }
 
+pub fn decrypt_aes_cbc(source: &[u8], key: &[u8], iv: [u8; 16]) -> Vec<u8> {
+    let blocks = as_blocks(source, 16);
+    let mut output = Vec::new();
+    for (index, block) in blocks.iter().enumerate() {
+        println!("{} {:?}", index, block); // TODO
+    }
+    output
+}
+
 pub fn decrypt_aes_ecb(ciphertext: &[u8], key: &[u8]) -> (Vec<u8>, usize) {
     aes_ecb(ciphertext, key, Mode::Decrypt)
 }
@@ -29,7 +39,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn sanity_check() {
+    fn ecb_sanity_check() {
         // ... i guess this is working correctly?
         // https://github.com/sfackler/rust-openssl/issues/40#issuecomment-269417798
         let plaintext = "AAAAAAAAAAAAAAAA".as_bytes();
