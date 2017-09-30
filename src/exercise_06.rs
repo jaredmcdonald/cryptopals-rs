@@ -2,7 +2,7 @@ use std::cmp::{Ord, Ordering, PartialEq};
 
 use edit_distance::get_edit_distance;
 use read_file::strings_from_filename;
-use utils::{flatten_lines, decode_base64_lines};
+use utils::{flatten, decode_base64_lines};
 use repeating_key_xor::repeating_key_xor;
 use ascii::bytes_to_ascii_string;
 use english::{EnglishyInput, get_most_englishy};
@@ -71,7 +71,7 @@ fn try_keysizes(bytes: &Vec<u8>) -> Vec<usize> {
 pub fn run_06() {
     let line_strings = strings_from_filename("06.txt");
     let lines = decode_base64_lines(&line_strings);
-    let flattened_bytes = flatten_lines(&lines);
+    let flattened_bytes = flatten(&lines);
     let keysizes = try_keysizes(&flattened_bytes).get(0..10).unwrap().to_vec(); // try the first ten :/
 
     let mut possible_keys = Vec::new();

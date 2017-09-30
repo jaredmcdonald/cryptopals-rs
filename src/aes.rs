@@ -17,11 +17,14 @@ fn aes_ecb(source: &[u8], key: &[u8], mode: Mode) -> (Vec<u8>, usize) {
     }
 }
 
-pub fn decrypt_aes_cbc(source: &[u8], key: &[u8], iv: [u8; 16]) -> Vec<u8> {
+pub fn decrypt_aes_cbc(source: &[u8], key: &[u8], iv: &[u8]) -> Vec<Vec<u8>> {
     let blocks = as_blocks(source, 16);
-    let mut output = Vec::new();
+    let mut output: Vec<Vec<u8>> = Vec::new();
     for (index, block) in blocks.iter().enumerate() {
-        println!("{} {:?}", index, block); // TODO
+        let (text, _) = decrypt_aes_ecb(&block, key);
+        let xor_against = if index == 0 { iv } else { &blocks[index - 1] };
+        let output_block = xor_buffers(&text[0..16], &xor_against).to_vec();
+        output.push(output_block);
     }
     output
 }

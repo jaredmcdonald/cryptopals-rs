@@ -8,9 +8,9 @@ pub fn as_blocks(bytes: &[u8], block_size: usize) -> Vec<Vec<u8>> {
     blocks
 }
 
-pub fn flatten_lines(byte_lines: &Vec<Vec<u8>>) -> Vec<u8> {
+pub fn flatten(blocks: &Vec<Vec<u8>>) -> Vec<u8> {
     let mut bytes = Vec::new();
-    for byte in byte_lines {
+    for byte in blocks {
         bytes.extend(byte);
     }
     bytes
@@ -26,7 +26,7 @@ pub fn decode_base64_lines(lines: &Vec<String>) -> Vec<Vec<u8>> {
 }
 
 pub fn xor_buffers(a: &[u8], b: &[u8]) -> Vec<u8> {
-    assert!(a.len() == b.len(), "can't xor buffers of unequal length");
+    assert!(a.len() == b.len(), "can't xor buffers of unequal length: {:?} {:?}", a, b);
     // is there a way to just map this? how to access the byte in b, since map fn doesn't get index?
     let mut xored = Vec::new();
     for i in 0..a.len() {
