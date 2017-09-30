@@ -6,6 +6,6 @@ use aes::decrypt_aes_ecb;
 pub fn run_07() {
     let key = "YELLOW SUBMARINE".as_bytes();
     let ciphertext = flatten(&decode_base64_lines(&strings_from_filename("07.txt")));
-    let (decrypted, _) = decrypt_aes_ecb(&ciphertext, key);
+    let decrypted = decrypt_aes_ecb(&ciphertext, key);
     println!("{}", bytes_to_ascii_string(&decrypted));
 }
