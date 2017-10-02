@@ -7,7 +7,7 @@ fn create_encrypter() -> Box<Fn(&[u8]) -> Vec<u8>> {
     Box::new(move |plaintext| {
         let mut extended_plaintext = Vec::new();
         extended_plaintext.extend(plaintext);
-        extended_plaintext.extend(plaintext_to_append.clone());
+        extended_plaintext.extend(&plaintext_to_append);
         encrypt_aes_ecb(&extended_plaintext, &key)
     })
 }
