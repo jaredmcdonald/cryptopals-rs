@@ -1,5 +1,6 @@
 use openssl::symm::{Crypter, Cipher, Mode};
 use std::collections::HashSet;
+use rand::random;
 use utils::{as_blocks, xor_buffers, flatten};
 
 fn aes_ecb(source: &[u8], key: &[u8], mode: Mode) -> Vec<u8> {
@@ -65,6 +66,11 @@ pub fn decrypt_aes_ecb(ciphertext: &[u8], key: &[u8]) -> Vec<u8> {
 pub fn encrypt_aes_ecb(text: &[u8], key: &[u8]) -> Vec<u8> {
     aes_ecb(text, key, Mode::Encrypt)
 }
+
+pub fn random_key() -> [u8; BLOCK_SIZE] {
+    random::<[u8; BLOCK_SIZE]>()
+}
+
 
 #[cfg(test)]
 mod tests {

@@ -1,9 +1,5 @@
 use rand::{random, thread_rng, Rng};
-use aes::{BLOCK_SIZE, encrypt_aes_cbc, encrypt_aes_ecb, is_ecb_encrypted};
-
-fn random_key() -> [u8; BLOCK_SIZE] {
-    random::<[u8; BLOCK_SIZE]>()
-}
+use aes::{encrypt_aes_cbc, encrypt_aes_ecb, is_ecb_encrypted, random_key};
 
 fn random_bytes() -> Vec<u8> {
     let num_extra_bytes: usize = thread_rng().gen_range(5, 11);
