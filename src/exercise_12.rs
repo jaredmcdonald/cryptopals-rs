@@ -12,7 +12,23 @@ fn create_encrypter() -> Box<Fn(&[u8]) -> Vec<u8>> {
     })
 }
 
+fn find_block_size(encrypter: Box<Fn(&[u8]) -> Vec<u8>>) -> usize {
+    let mut block_size = 0;
+    let byte = 0x0;
+    let smallest_size = encrypter(vec![byte; 0x1].as_slice()).len();
+    for n in 0x002..0x100 {
+        let result = encrypter(vec![0x0u8; n].as_slice());
+        let len = result.len();
+        if len != smallest_size {
+            block_size = len - smallest_size;
+            break;
+        }
+    }
+    block_size
+}
+
 pub fn run_12() {
     let encrypter = create_encrypter();
-    println!("{:?}", encrypter("AAAAAAAAAAAAAAAA".as_bytes()));
+    let block_size = find_block_size(encrypter);
+    println!("{}", block_size);
 }
