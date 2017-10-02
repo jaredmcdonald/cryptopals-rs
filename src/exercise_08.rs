@@ -1,6 +1,6 @@
 use read_file::strings_from_filename;
 use hex::parse_hex;
-use aes::is_ecb_encrypted;
+use aes_oracles::is_ecb_encrypted;
 
 pub fn run_08() {
     let lines = strings_from_filename("08.txt");

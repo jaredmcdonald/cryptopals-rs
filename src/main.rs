@@ -23,6 +23,7 @@ mod hex;
 mod read_file;
 mod utils;
 mod aes;
+mod aes_oracles;
 mod pkcs_7;
 
 use std::env::args;
