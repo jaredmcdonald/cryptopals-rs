@@ -49,7 +49,10 @@ fn decrypt_byte(
         Some(byte) => byte.to_vec(),
         None => return None,
     };
-    Some(*first_blocks_to_bytes.get(&actual_first_byte).unwrap())
+    match first_blocks_to_bytes.get(&actual_first_byte) {
+        Some(byte) => Some(*byte),
+        None => None,
+    }
 }
 
 fn decrypt_ecb(encrypter: &Box<Fn(&[u8]) -> Vec<u8>>, blocksize: usize) -> Vec<u8> {

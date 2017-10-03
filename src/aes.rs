@@ -1,7 +1,7 @@
 use openssl::symm::{Crypter, Cipher, Mode};
 use utils::{as_blocks, xor_buffers, flatten};
 
-fn aes_ecb(source: &[u8], key: &[u8], mode: Mode) -> Vec<u8> {
+fn aes_ecb(data: &[u8], key: &[u8], mode: Mode) -> Vec<u8> {
     let cipher = Cipher::aes_128_ecb();
     let mut crypter = Crypter::new(
         cipher,
@@ -10,14 +10,12 @@ fn aes_ecb(source: &[u8], key: &[u8], mode: Mode) -> Vec<u8> {
         None
     ).unwrap();
 
-    let mut output = vec![0; source.len() + cipher.block_size()];
-    match crypter.update(&source, output.as_mut_slice()) {
-        Ok(cipherlen) => match mode {
-            Mode::Encrypt => output[..cipherlen].to_vec(),
-            _ => output.to_vec(),
-        },
-        Err(e) => panic!("aes_ecb error: {:?}", e),
-    }
+    // https://github.com/sfackler/rust-openssl/blob/master/openssl/src/symm.rs#L383-L396
+    let mut output = vec![0; data.len() + cipher.block_size()];
+    let count = crypter.update(data, &mut output).unwrap();
+    let rest = crypter.finalize(&mut output[count..]).unwrap();
+    output.truncate(count + rest);
+    output
 }
 
 pub const BLOCK_SIZE: usize = 0x10;
