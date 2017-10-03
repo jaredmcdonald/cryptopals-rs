@@ -25,6 +25,7 @@ mod utils;
 mod aes;
 mod aes_oracles;
 mod pkcs_7;
+mod parse_cookie;
 
 use std::env::args;
 
