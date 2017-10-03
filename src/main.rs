@@ -14,6 +14,7 @@ mod exercise_09;
 mod exercise_10;
 mod exercise_11;
 mod exercise_12;
+mod exercise_13;
 
 mod edit_distance;
 mod ascii;
@@ -25,7 +26,6 @@ mod utils;
 mod aes;
 mod aes_oracles;
 mod pkcs_7;
-mod parse_cookie;
 
 use std::env::args;
 
@@ -41,6 +41,7 @@ use exercise_09::run_09;
 use exercise_10::run_10;
 use exercise_11::run_11;
 use exercise_12::run_12;
+use exercise_13::run_13;
 
 fn main() {
     if let Some(which_exercise) = args().nth(1) {
@@ -57,6 +58,7 @@ fn main() {
             Ok(10) => run_10(),
             Ok(11) => run_11(),
             Ok(12) => run_12(),
+            Ok(13) => run_13(),
             _ => println!("no such exercise"),
         };
     } else {
