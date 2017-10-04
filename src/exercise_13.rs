@@ -1,7 +1,7 @@
 use ascii::bytes_to_ascii_string;
 use std::collections::HashMap;
 use aes_oracles::random_key;
-use aes::{encrypt_aes_ecb, decrypt_aes_ecb};
+use aes::{encrypt_aes_ecb_padded, decrypt_aes_ecb_padded};
 
 fn parse(s: &str) -> HashMap<&str, String> {
     let mut output = HashMap::new();
@@ -37,13 +37,13 @@ struct OracleResult {
 fn encryption_oracle(email: &str) -> OracleResult {
     let key = random_key();
     let encoded_profile = encode(profile_for(email));
-    let ciphertext = encrypt_aes_ecb(encoded_profile.as_bytes(), &key);
+    let ciphertext = encrypt_aes_ecb_padded(encoded_profile.as_bytes(), &key);
     OracleResult { ciphertext, key: key.to_vec() }
 }
 
 pub fn run_13() {
     let OracleResult { ciphertext, key } = encryption_oracle("foobar@bar.com");
-    let decrypted = decrypt_aes_ecb(&ciphertext, &key);
+    let decrypted = decrypt_aes_ecb_padded(&ciphertext, &key);
     let encoded_profile = bytes_to_ascii_string(&decrypted);
     let reassembled_profile = parse(&encoded_profile);
     println!("{:?}", reassembled_profile);
