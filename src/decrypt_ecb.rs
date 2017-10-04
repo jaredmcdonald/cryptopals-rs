@@ -69,24 +69,24 @@ fn find_prefix_len(encrypter: &Encrypter, blocksize: usize) -> Option<usize> {
     None
 }
 
-fn curry_encrypter<'a>(
+fn encrypter_factory<'a>(
     old_encrypter: &'a Encrypter,
     prefix_len: usize,
     padding_len: usize
 ) -> Encrypter<'a> {
+    // the number of bytes that are just prefix + prefix padding and should be lopped off each time
+    let bytes_to_remove = prefix_len + padding_len;
     Box::new(move |plaintext| {
-        // the number of bytes that are just prefix + prefix padding and should be lopped off each time
-        let bytes_to_remove = prefix_len + padding_len;
         let mut modified_plaintext = vec![0x0; padding_len];
         modified_plaintext.extend(plaintext);
-        old_encrypter(plaintext)[bytes_to_remove..].to_vec()
+        old_encrypter(modified_plaintext.as_slice())[bytes_to_remove..].to_vec()
     })
 }
 
 pub fn decrypt_ecb_with_prefix(encrypter: &Encrypter, blocksize: usize) -> Vec<u8> {
     let prefix_len = find_prefix_len(encrypter, blocksize).unwrap();
     // the number of bytes we need to get the prefix to occupy an even number of blocks
-    let padding_len = blocksize - blocksize % prefix_len;
-    let new_encrypter = curry_encrypter(encrypter, prefix_len, padding_len);
+    let padding_len = blocksize - (prefix_len % blocksize);
+    let new_encrypter = encrypter_factory(encrypter, prefix_len, padding_len);
     decrypt_ecb(&new_encrypter, blocksize)
 }
