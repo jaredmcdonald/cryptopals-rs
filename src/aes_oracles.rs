@@ -65,7 +65,6 @@ pub fn ecb_oracle(prepend_random_bytes: bool) -> Box<Fn(&[u8]) -> Vec<u8>> {
     let plaintext_to_append = base64_decode("Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK").unwrap();
     // 2.14: assuming the prefix is unknown but constant; if it's not constant, this becomes a lot harder
     let garbage_prefix = random_bytes_between(2, 20);
-    println!("{:?}", garbage_prefix.len());
     Box::new(move |plaintext| {
         let mut extended_plaintext = Vec::new();
         if prepend_random_bytes {

@@ -27,6 +27,7 @@ mod utils;
 mod aes;
 mod aes_oracles;
 mod pkcs_7;
+mod decrypt_ecb;
 
 use std::env::args;
 
