@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use rand::{random, thread_rng, Rng};
-use aes::{BLOCK_SIZE, encrypt_aes_cbc, encrypt_aes_ecb};
+use aes::{BLOCK_SIZE, encrypt_aes_cbc, encrypt_aes_ecb_padded};
 
 pub fn random_key() -> [u8; BLOCK_SIZE] {
     random::<[u8; BLOCK_SIZE]>()
@@ -54,7 +54,7 @@ pub fn encryption_oracle() -> Box<Fn(&[u8]) -> Vec<u8>> {
         if random::<bool>() { // CBC
             encrypt_aes_cbc(&modified_plaintext, &random_key(), &random_key())
         } else { // ECB
-            encrypt_aes_ecb(&modified_plaintext, &random_key())
+            encrypt_aes_ecb_padded(&modified_plaintext, &random_key())
         }
     })
 }

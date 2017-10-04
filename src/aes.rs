@@ -1,5 +1,6 @@
 use openssl::symm::{Crypter, Cipher, Mode};
 use utils::{as_blocks, xor_buffers, flatten};
+use pkcs_7::{pad, unpad};
 
 fn aes_ecb(data: &[u8], key: &[u8], mode: Mode) -> Vec<u8> {
     let cipher = Cipher::aes_128_ecb();
@@ -9,6 +10,8 @@ fn aes_ecb(data: &[u8], key: &[u8], mode: Mode) -> Vec<u8> {
         &key,
         None
     ).unwrap();
+
+    crypter.pad(false);
 
     // https://github.com/sfackler/rust-openssl/blob/master/openssl/src/symm.rs#L383-L396
     let mut output = vec![0; data.len() + cipher.block_size()];
@@ -26,7 +29,7 @@ pub fn decrypt_aes_cbc(ciphertext: &[u8], key: &[u8], iv: &[u8]) -> Vec<u8> {
     for (index, block) in blocks.iter().enumerate() {
         let text = decrypt_aes_ecb(&block, key);
         let xor_against = if index == 0 { iv } else { &blocks[index - 1] };
-        let output_block = xor_buffers(&text[..BLOCK_SIZE], &xor_against).to_vec();
+        let output_block = xor_buffers(&text, &xor_against).to_vec();
         output.push(output_block);
     }
     flatten(&output)
@@ -49,10 +52,17 @@ pub fn decrypt_aes_ecb(ciphertext: &[u8], key: &[u8]) -> Vec<u8> {
     aes_ecb(ciphertext, key, Mode::Decrypt)
 }
 
+pub fn decrypt_aes_ecb_padded(ciphertext: &[u8], key: &[u8]) -> Vec<u8> {
+    unpad(&decrypt_aes_ecb(ciphertext, key), BLOCK_SIZE).unwrap()
+}
+
 pub fn encrypt_aes_ecb(text: &[u8], key: &[u8]) -> Vec<u8> {
     aes_ecb(text, key, Mode::Encrypt)
 }
 
+pub fn encrypt_aes_ecb_padded(text: &[u8], key: &[u8]) -> Vec<u8> {
+    encrypt_aes_ecb(&pad(text, BLOCK_SIZE), key)
+}
 
 #[cfg(test)]
 mod tests {

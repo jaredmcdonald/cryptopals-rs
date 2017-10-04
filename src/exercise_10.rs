@@ -6,6 +6,6 @@ use ascii::bytes_to_ascii_string;
 pub fn run_10() {
     let ciphertext = flatten(&decode_base64_lines(&strings_from_filename("10.txt")));
     let key = "YELLOW SUBMARINE".as_bytes();
-    println!("{:?}",
+    println!("{}",
         bytes_to_ascii_string(&decrypt_aes_cbc(&ciphertext, key, vec![0x0u8; 16].as_slice())));
 }

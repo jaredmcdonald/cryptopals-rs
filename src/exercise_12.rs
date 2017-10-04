@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use base64::decode as base64_decode;
-use aes::encrypt_aes_ecb;
+use aes::encrypt_aes_ecb_padded;
 use aes_oracles::{random_key, detection_oracle, AesEncryptionMode};
 use ascii::bytes_to_ascii_string;
 
@@ -11,7 +11,7 @@ fn create_encrypter() -> Box<Fn(&[u8]) -> Vec<u8>> {
         let mut extended_plaintext = Vec::new();
         extended_plaintext.extend(plaintext);
         extended_plaintext.extend(&plaintext_to_append);
-        encrypt_aes_ecb(&extended_plaintext, &key)
+        encrypt_aes_ecb_padded(&extended_plaintext, &key)
     })
 }
 
