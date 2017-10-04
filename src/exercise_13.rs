@@ -17,6 +17,7 @@ fn encode(map: HashMap<&str, String>) -> String {
     for (key, value) in map {
         encoded_pairs.push(format!("{}={}", key, value));
     }
+    encoded_pairs.sort(); // give it some deterministic order, not sure if this is necessary
     encoded_pairs.join("&")
 }
 
@@ -66,20 +67,16 @@ mod tests {
 
     #[test]
     fn encodes_profile() {
-        let mut input = HashMap::new();
-        input.insert("foo", "bar".to_string());
-        input.insert("baz", "qux".to_string());
-        input.insert("zap", "zazzle".to_string());
-        let output = encode(input);
-        assert!(
-            // no order, need to check all possibilities
-            output == "foo=bar&baz=qux&zap=zazzle" ||
-            output == "foo=bar&zap=zazzle&baz=qux" ||
-            output == "baz=qux&foo=bar&zap=zazzle" ||
-            output == "baz=qux&zap=zazzle&foo=bar" ||
-            output == "zap=zazzle&baz=qux&foo=bar" ||
-            output == "zap=zazzle&foo=bar&baz=qux"
-        );
+        // run 10x to show that we didn't just get lucky w/ key ordering,
+        // it's actually deterministic (alpha sorted)
+        for _ in 0..10 {
+            let mut input = HashMap::new();
+            input.insert("foo", "bar".to_string());
+            input.insert("baz", "qux".to_string());
+            input.insert("zap", "zazzle".to_string());
+            let output = encode(input);
+            assert_eq!(output, "baz=qux&foo=bar&zap=zazzle");
+        }
     }
 
     #[test]
