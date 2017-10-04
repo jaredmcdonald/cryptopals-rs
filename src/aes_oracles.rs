@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use rand::{random, thread_rng, Rng};
+use base64::decode as base64_decode;
 use aes::{BLOCK_SIZE, encrypt_aes_cbc, encrypt_aes_ecb_padded};
 
 pub fn random_key() -> [u8; BLOCK_SIZE] {
@@ -31,8 +32,8 @@ pub fn detection_oracle(encrypter: &Box<Fn(&[u8]) -> Vec<u8>>) -> AesEncryptionM
     }
 }
 
-fn random_bytes() -> Vec<u8> {
-    let num_extra_bytes: usize = thread_rng().gen_range(5, 11);
+fn random_bytes_between(start: usize, end: usize) -> Vec<u8> {
+    let num_extra_bytes: usize = thread_rng().gen_range(start, end);
     let mut output = Vec::new();
     for _ in 0..num_extra_bytes {
         output.push(random::<u8>());
@@ -42,13 +43,13 @@ fn random_bytes() -> Vec<u8> {
 
 fn random_bytes_around(bytes: &[u8]) -> Vec<u8> {
     let mut modified = Vec::new();
-    modified.extend(random_bytes());
+    modified.extend(random_bytes_between(5, 11));
     modified.extend(bytes);
-    modified.extend(random_bytes());
+    modified.extend(random_bytes_between(5, 11));
     modified
 }
 
-pub fn encryption_oracle() -> Box<Fn(&[u8]) -> Vec<u8>> {
+pub fn ecb_or_cbc_oracle() -> Box<Fn(&[u8]) -> Vec<u8>> {
     Box::new(|plaintext| {
         let modified_plaintext = random_bytes_around(plaintext);
         if random::<bool>() { // CBC
@@ -57,4 +58,35 @@ pub fn encryption_oracle() -> Box<Fn(&[u8]) -> Vec<u8>> {
             encrypt_aes_ecb_padded(&modified_plaintext, &random_key())
         }
     })
+}
+
+pub fn ecb_oracle(prepend_random_bytes: bool) -> Box<Fn(&[u8]) -> Vec<u8>> {
+    let key = random_key();
+    let plaintext_to_append = base64_decode("Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK").unwrap();
+    // 2.14: assuming the prefix is unknown but constant; if it's not constant, this becomes a lot harder
+    let garbage_prefix = random_bytes_between(2, 20);
+    println!("{:?}", garbage_prefix.len());
+    Box::new(move |plaintext| {
+        let mut extended_plaintext = Vec::new();
+        if prepend_random_bytes {
+            extended_plaintext.extend(&garbage_prefix);
+        }
+        extended_plaintext.extend(plaintext);
+        extended_plaintext.extend(&plaintext_to_append);
+        encrypt_aes_ecb_padded(&extended_plaintext, &key)
+    })
+}
+
+pub fn find_blocksize(encrypter: &Box<Fn(&[u8]) -> Vec<u8>>) -> usize {
+    let mut blocksize = 0;
+    let smallest_size = encrypter(Vec::new().as_slice()).len();
+    for n in 0x001..0x100 {
+        let result = encrypter(vec![0x0u8; n].as_slice());
+        let len = result.len();
+        if len != smallest_size {
+            blocksize = len - smallest_size;
+            break;
+        }
+    }
+    blocksize
 }
