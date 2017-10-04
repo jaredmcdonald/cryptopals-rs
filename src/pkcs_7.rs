@@ -78,4 +78,34 @@ mod tests {
         let output = unpad(&input, 8);
         assert_eq!(output.unwrap(), expected);
     }
+
+    #[test]
+    fn unpad_wrong_value() {
+        let input = "ICE ICE BABY\x05\x05\x05\x05".as_bytes();
+        if let Err(err) = unpad(&input, 16) {
+            assert_eq!(err, "padding value wasn't consistent");
+        } else {
+            panic!("should have been an Err");
+        }
+    }
+
+    #[test]
+    fn unpad_not_multiple_of_blocksize() {
+        let input = "ICE ICE BABY\x03\x03\x03".as_bytes();
+        if let Err(err) = unpad(&input, 16) {
+            assert_eq!(err, "input length should be a multiple of block size to unpad");
+        } else {
+            panic!("should have been an Err");
+        }
+    }
+
+    #[test]
+    fn unpad_weird_padding_value() {
+        let input = "ICE ICE BABY\x33\x33\x33\x33".as_bytes();
+        if let Err(err) = unpad(&input, 16) {
+            assert_eq!(err, "padding value was greater than block size");
+        } else {
+            panic!("should have been an Err");
+        }
+    }
 }
