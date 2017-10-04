@@ -30,20 +30,14 @@ fn profile_for(email: &str) -> HashMap<&str, String> {
     profile
 }
 
-struct OracleResult {
-    ciphertext: Vec<u8>,
-    key: Vec<u8>,
-}
-
-fn encryption_oracle(email: &str) -> OracleResult {
-    let key = random_key();
+fn encryption_oracle(email: &str, key: &[u8]) -> Vec<u8> {
     let encoded_profile = encode(profile_for(email));
-    let ciphertext = encrypt_aes_ecb_padded(encoded_profile.as_bytes(), &key);
-    OracleResult { ciphertext, key: key.to_vec() }
+    encrypt_aes_ecb_padded(encoded_profile.as_bytes(), key)
 }
 
 pub fn run_13() {
-    let OracleResult { ciphertext, key } = encryption_oracle("foobar@bar.com");
+    let key = random_key();
+    let ciphertext = encryption_oracle("foobar@bar.com", &key);
     let decrypted = decrypt_aes_ecb_padded(&ciphertext, &key);
     let encoded_profile = bytes_to_ascii_string(&decrypted);
     let reassembled_profile = parse(&encoded_profile);
