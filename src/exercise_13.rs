@@ -1,7 +1,7 @@
 use ascii::bytes_to_ascii_string;
 use std::collections::HashMap;
 use aes_oracles::random_key;
-use aes::{encrypt_aes_ecb_padded, decrypt_aes_ecb_padded};
+use aes::{encrypt_aes_ecb_padded, decrypt_aes_ecb_padded, BLOCK_SIZE};
 
 fn parse(s: &str) -> HashMap<&str, String> {
     let mut output = HashMap::new();
@@ -37,10 +37,22 @@ fn encryption_oracle(email: &str, key: &[u8]) -> Vec<u8> {
 
 pub fn run_13() {
     let key = random_key();
-    let ciphertext = encryption_oracle("foobar@bar.com", &key);
-    let decrypted = decrypt_aes_ecb_padded(&ciphertext, &key);
+
+    // to be pasted over the real block
+    let bogus_block = encrypt_aes_ecb_padded("role=admin&uid=1".as_bytes(), &key);
+
+    // ends up encoded as 16 bytes: "email=f@bar.com&"
+    // (one block, pushing everything else into the next block)
+    let ciphertext = encryption_oracle("f@bar.com", &key);
+
+    let mut manipulated_ciphertext = Vec::new();
+    manipulated_ciphertext.extend(&ciphertext[..BLOCK_SIZE]);
+    manipulated_ciphertext.extend(&bogus_block);
+
+    let decrypted = decrypt_aes_ecb_padded(&manipulated_ciphertext, &key);
     let encoded_profile = bytes_to_ascii_string(&decrypted);
     let reassembled_profile = parse(&encoded_profile);
+
     println!("{:?}", reassembled_profile);
 }
 
