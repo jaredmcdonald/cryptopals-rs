@@ -3,6 +3,8 @@ use rand::{random, thread_rng, Rng};
 use base64::decode as base64_decode;
 use aes::{BLOCK_SIZE, encrypt_aes_cbc, encrypt_aes_ecb_padded};
 
+pub type Encrypter<'a> = Box<Fn(&[u8]) -> Vec<u8> + 'a>;
+
 pub fn random_key() -> [u8; BLOCK_SIZE] {
     random::<[u8; BLOCK_SIZE]>()
 }
@@ -23,7 +25,7 @@ pub enum AesEncryptionMode {
     ECB,
 }
 
-pub fn detection_oracle(encrypter: &Box<Fn(&[u8]) -> Vec<u8>>) -> AesEncryptionMode {
+pub fn detection_oracle(encrypter: &Encrypter) -> AesEncryptionMode {
     let ciphertext = encrypter(vec![0x0; 0x200].as_slice()); // should be enough to generate repeated blocks
     if is_ecb_encrypted(&ciphertext) {
         AesEncryptionMode::ECB
@@ -49,7 +51,7 @@ fn random_bytes_around(bytes: &[u8]) -> Vec<u8> {
     modified
 }
 
-pub fn ecb_or_cbc_oracle() -> Box<Fn(&[u8]) -> Vec<u8>> {
+pub fn ecb_or_cbc_oracle<'a>() -> Encrypter<'a> {
     Box::new(|plaintext| {
         let modified_plaintext = random_bytes_around(plaintext);
         if random::<bool>() { // CBC
@@ -60,7 +62,7 @@ pub fn ecb_or_cbc_oracle() -> Box<Fn(&[u8]) -> Vec<u8>> {
     })
 }
 
-pub fn ecb_oracle(prepend_random_bytes: bool) -> Box<Fn(&[u8]) -> Vec<u8>> {
+pub fn ecb_oracle<'a>(prepend_random_bytes: bool) -> Encrypter<'a> {
     let key = random_key();
     let plaintext_to_append = base64_decode("Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK").unwrap();
     // 2.14: assuming the prefix is unknown but constant; if it's not constant, this becomes a lot harder
@@ -76,7 +78,7 @@ pub fn ecb_oracle(prepend_random_bytes: bool) -> Box<Fn(&[u8]) -> Vec<u8>> {
     })
 }
 
-pub fn find_blocksize(encrypter: &Box<Fn(&[u8]) -> Vec<u8>>) -> usize {
+pub fn find_blocksize(encrypter: &Encrypter) -> usize {
     let mut blocksize = 0;
     let smallest_size = encrypter(Vec::new().as_slice()).len();
     for n in 0x001..0x100 {
