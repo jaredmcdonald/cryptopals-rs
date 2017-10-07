@@ -5,8 +5,12 @@ use aes::{BLOCK_SIZE, encrypt_aes_cbc, encrypt_aes_ecb_padded};
 
 pub type Encrypter<'a> = Box<Fn(&[u8]) -> Vec<u8> + 'a>;
 
-pub fn random_key() -> [u8; BLOCK_SIZE] {
-    random::<[u8; BLOCK_SIZE]>()
+pub fn random_bytes(n: usize) -> Vec<u8> {
+    let mut output = Vec::new();
+    for _ in 0..n {
+        output.push(random::<u8>());
+    }
+    output
 }
 
 pub fn is_ecb_encrypted(bytes: &[u8]) -> bool {
@@ -55,15 +59,15 @@ pub fn ecb_or_cbc_oracle<'a>() -> Encrypter<'a> {
     Box::new(|plaintext| {
         let modified_plaintext = random_bytes_around(plaintext);
         if random::<bool>() { // CBC
-            encrypt_aes_cbc(&modified_plaintext, &random_key(), &random_key())
+            encrypt_aes_cbc(&modified_plaintext, &random_bytes(BLOCK_SIZE), &random_bytes(BLOCK_SIZE))
         } else { // ECB
-            encrypt_aes_ecb_padded(&modified_plaintext, &random_key())
+            encrypt_aes_ecb_padded(&modified_plaintext, &random_bytes(BLOCK_SIZE))
         }
     })
 }
 
 pub fn ecb_oracle<'a>(prepend_random_bytes: bool) -> Encrypter<'a> {
-    let key = random_key();
+    let key = random_bytes(BLOCK_SIZE);
     let plaintext_to_append = base64_decode("Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK").unwrap();
     // 2.14: assuming the prefix is unknown but constant; if it's not constant, this becomes a lot harder
     let garbage_prefix = random_bytes_between(2, 0x100);

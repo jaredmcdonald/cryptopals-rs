@@ -1,6 +1,6 @@
 use ascii::bytes_to_ascii_string;
 use std::collections::HashMap;
-use aes_oracles::random_key;
+use aes_oracles::random_bytes;
 use aes::{encrypt_aes_ecb_padded, decrypt_aes_ecb_padded, BLOCK_SIZE};
 
 fn parse(s: &str) -> HashMap<&str, String> {
@@ -36,7 +36,7 @@ fn encryption_oracle(email: &str, key: &[u8]) -> Vec<u8> {
 }
 
 pub fn run_13() {
-    let key = random_key();
+    let key = random_bytes(BLOCK_SIZE);
 
     // to be pasted over the real block
     let bogus_block = encrypt_aes_ecb_padded("role=admin&uid=1".as_bytes(), &key);

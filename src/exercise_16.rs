@@ -1,5 +1,5 @@
 use aes::{encrypt_aes_cbc, decrypt_aes_cbc, BLOCK_SIZE};
-use aes_oracles::random_key;
+use aes_oracles::random_bytes;
 use utils::xor_buffers;
 use pkcs_7::pad;
 use ascii::bytes_to_ascii_string;
@@ -15,8 +15,8 @@ fn generate_encrypted_profile(content: &[u8], key: &[u8], iv: &[u8]) -> Vec<u8> 
 }
 
 pub fn run_16() {
-    let key = random_key();
-    let iv = random_key();
+    let key = random_bytes(BLOCK_SIZE);
+    let iv = random_bytes(BLOCK_SIZE);
 
     let target = "ha;admin=true;ha".as_bytes();
     let input = "0123456789abcdef".as_bytes();
