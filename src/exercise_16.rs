@@ -40,13 +40,13 @@ mod tests {
 
     #[test]
     fn interpolates_in_content() {
-        assert_eq!(generate_profile("hello world"),
-            "comment1=cooking%20MCs;userdata=hello%20world;comment2=%20like%20a%20pound%20of%20bacon");
+        assert_eq!(generate_profile(b"hello world"),
+            b"comment1=cooking%20MCs;userdata=hello%20world;comment2=%20like%20a%20pound%20of%20bacon".to_vec());
     }
 
     #[test]
     fn quotes_metacharacters() {
-        assert_eq!(generate_profile("hello world;role=admin"),
-            "comment1=cooking%20MCs;userdata=hello%20world%3Brole%3Dadmin;comment2=%20like%20a%20pound%20of%20bacon");
+        assert_eq!(generate_profile(b"hello world;role=admin"),
+            b"comment1=cooking%20MCs;userdata=hello%20world%3Brole%3Dadmin;comment2=%20like%20a%20pound%20of%20bacon".to_vec());
     }
 }

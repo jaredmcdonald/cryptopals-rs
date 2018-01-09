@@ -6,7 +6,7 @@ use aes::{encrypt_aes_cbc, decrypt_aes_cbc, BLOCK_SIZE};
 use utils::as_blocks;
 
 fn encrypter(key: &[u8], iv: &[u8]) -> Vec<u8> {
-    let b64_strings = vec![
+    let b64_strings = [
         "MDAwMDAwTm93IHRoYXQgdGhlIHBhcnR5IGlzIGp1bXBpbmc=",
         // "MDAwMDAxV2l0aCB0aGUgYmFzcyBraWNrZWQgaW4gYW5kIHRoZSBWZWdhJ3MgYXJlIHB1bXBpbic=",
         // "MDAwMDAyUXVpY2sgdG8gdGhlIHBvaW50LCB0byB0aGUgcG9pbnQsIG5vIGZha2luZw==",
@@ -56,5 +56,5 @@ pub fn run_17() {
         &ciphertext[len - BLOCK_SIZE..],
         &ciphertext[len - BLOCK_SIZE * 2..len - BLOCK_SIZE],
         &padding_oracle
-    ).unwrap() as char);
+    ).unwrap());
 }
