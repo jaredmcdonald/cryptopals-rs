@@ -49,7 +49,7 @@ pub fn run_17() {
 
     let padding_oracle = |ciphertext: &[u8]| -> bool {
         let decrypted = decrypt_aes_cbc(ciphertext, &key, &iv);
-        if let Ok(_) = unpad(&decrypted, BLOCK_SIZE) { true } else { false } // 👈 is there a better way to do this?
+        unpad(&decrypted, BLOCK_SIZE).is_ok()
     };
 
     println!("{}", decrypt_block(
