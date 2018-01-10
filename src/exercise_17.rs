@@ -7,8 +7,8 @@ use utils::as_blocks;
 
 fn encrypter(key: &[u8], iv: &[u8]) -> Vec<u8> {
     let b64_strings = [
-        // "MDAwMDAwTm93IHRoYXQgdGhlIHBhcnR5IGlzIGp1bXBpbmc=",
-        "MDAwMDAxV2l0aCB0aGUgYmFzcyBraWNrZWQgaW4gYW5kIHRoZSBWZWdhJ3MgYXJlIHB1bXBpbic=",
+        "MDAwMDAwTm93IHRoYXQgdGhlIHBhcnR5IGlzIGp1bXBpbmc=",
+        // "MDAwMDAxV2l0aCB0aGUgYmFzcyBraWNrZWQgaW4gYW5kIHRoZSBWZWdhJ3MgYXJlIHB1bXBpbic=",
         // "MDAwMDAyUXVpY2sgdG8gdGhlIHBvaW50LCB0byB0aGUgcG9pbnQsIG5vIGZha2luZw==",
         // "MDAwMDAzQ29va2luZyBNQydzIGxpa2UgYSBwb3VuZCBvZiBiYWNvbg==",
         // "MDAwMDA0QnVybmluZyAnZW0sIGlmIHlvdSBhaW4ndCBxdWljayBhbmQgbmltYmxl",
@@ -46,16 +46,18 @@ pub fn run_17() {
     let key = random_bytes(BLOCK_SIZE);
     let real_iv = random_bytes(BLOCK_SIZE);
     let ciphertext = encrypter(&key, &real_iv);
-    let len = ciphertext.len();
 
     let padding_oracle = |iv: &[u8], ciphertext: &[u8]| -> bool {
         let decrypted = decrypt_aes_cbc(ciphertext, &key, &iv);
         unpad(&decrypted, BLOCK_SIZE).is_ok()
     };
 
+    let ciphertext_blocks = as_blocks(&ciphertext, BLOCK_SIZE);
+    let num_blocks = ciphertext_blocks.len();
+
     println!("{:?}", decrypt_block(
-        &ciphertext[len - BLOCK_SIZE..],
-        &ciphertext[len - BLOCK_SIZE * 2..len - BLOCK_SIZE],
+        &ciphertext_blocks[num_blocks - 1],
+        &ciphertext_blocks[num_blocks - 2],
         &padding_oracle
     ));
 }
