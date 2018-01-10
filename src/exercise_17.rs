@@ -37,6 +37,7 @@ fn decrypt_block(
             // ? todo
             let intermediate_byte = byte ^ 1;
             found[BLOCK_SIZE - 1] = previous_block[BLOCK_SIZE - 1] ^ intermediate_byte;
+            break;
         }
     }
     found
