@@ -8,15 +8,15 @@ use utils::{as_blocks, xor_buffers};
 fn encrypter(key: &[u8], iv: &[u8]) -> Vec<u8> {
     let b64_strings = [
         "MDAwMDAwTm93IHRoYXQgdGhlIHBhcnR5IGlzIGp1bXBpbmc=",
-        // "MDAwMDAxV2l0aCB0aGUgYmFzcyBraWNrZWQgaW4gYW5kIHRoZSBWZWdhJ3MgYXJlIHB1bXBpbic=",
-        // "MDAwMDAyUXVpY2sgdG8gdGhlIHBvaW50LCB0byB0aGUgcG9pbnQsIG5vIGZha2luZw==",
-        // "MDAwMDAzQ29va2luZyBNQydzIGxpa2UgYSBwb3VuZCBvZiBiYWNvbg==",
-        // "MDAwMDA0QnVybmluZyAnZW0sIGlmIHlvdSBhaW4ndCBxdWljayBhbmQgbmltYmxl",
-        // "MDAwMDA1SSBnbyBjcmF6eSB3aGVuIEkgaGVhciBhIGN5bWJhbA==",
-        // "MDAwMDA2QW5kIGEgaGlnaCBoYXQgd2l0aCBhIHNvdXBlZCB1cCB0ZW1wbw==",
-        // "MDAwMDA3SSdtIG9uIGEgcm9sbCwgaXQncyB0aW1lIHRvIGdvIHNvbG8=",
-        // "MDAwMDA4b2xsaW4nIGluIG15IGZpdmUgcG9pbnQgb2g=",
-        // "MDAwMDA5aXRoIG15IHJhZy10b3AgZG93biBzbyBteSBoYWlyIGNhbiBibG93"
+        "MDAwMDAxV2l0aCB0aGUgYmFzcyBraWNrZWQgaW4gYW5kIHRoZSBWZWdhJ3MgYXJlIHB1bXBpbic=",
+        "MDAwMDAyUXVpY2sgdG8gdGhlIHBvaW50LCB0byB0aGUgcG9pbnQsIG5vIGZha2luZw==",
+        "MDAwMDAzQ29va2luZyBNQydzIGxpa2UgYSBwb3VuZCBvZiBiYWNvbg==",
+        "MDAwMDA0QnVybmluZyAnZW0sIGlmIHlvdSBhaW4ndCBxdWljayBhbmQgbmltYmxl",
+        "MDAwMDA1SSBnbyBjcmF6eSB3aGVuIEkgaGVhciBhIGN5bWJhbA==",
+        "MDAwMDA2QW5kIGEgaGlnaCBoYXQgd2l0aCBhIHNvdXBlZCB1cCB0ZW1wbw==",
+        "MDAwMDA3SSdtIG9uIGEgcm9sbCwgaXQncyB0aW1lIHRvIGdvIHNvbG8=",
+        "MDAwMDA4b2xsaW4nIGluIG15IGZpdmUgcG9pbnQgb2g=",
+        "MDAwMDA5aXRoIG15IHJhZy10b3AgZG93biBzbyBteSBoYWlyIGNhbiBibG93"
     ];
     let plaintext = base64_decode(thread_rng().choose(&b64_strings).unwrap()).unwrap();
     println!("expected: {}", plaintext.iter().map(|b| *b as char).collect::<String>());
@@ -29,6 +29,8 @@ fn decrypt_block(
     padding_oracle: &Fn(&[u8], &[u8]) -> bool
 ) -> [u8; 16] {
     let mut decoded = [0u8; BLOCK_SIZE];
+    let already_has_valid_padding = padding_oracle(previous_block, block);
+
     for padding_byte in 1..BLOCK_SIZE + 1 { // 1..16 inclusive (TODO)
         let target_byte_index = BLOCK_SIZE - padding_byte; // 15..0 inclusive
 
@@ -39,10 +41,12 @@ fn decrypt_block(
         for byte in 0x0..0xff {
             let mut manipulated_iv = base_iv.clone();
             manipulated_iv[target_byte_index] ^= byte;
-            
+
             if padding_oracle(&manipulated_iv, block) {
                 decoded[target_byte_index] = byte;
-                break;
+                if !already_has_valid_padding {
+                    break;
+                }
             }
         }
     }
