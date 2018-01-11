@@ -16,6 +16,9 @@ pub fn unpad(bytes: &[u8], block_size: usize) -> Result<Vec<u8>, &str> {
         return Err("input length should be a multiple of block size to unpad");
     }
     let padding_value = bytes[len - 1] as usize;
+    if padding_value == 0 {
+        return Err("0 is an invalid padding value");
+    }
     if padding_value > block_size {
         return Err("padding value was greater than block size");
     }
@@ -97,6 +100,12 @@ mod tests {
         } else {
             panic!("should have been an Err");
         }
+    }
+
+    #[test]
+    fn unpad_zero() {
+        assert!(unpad(&[0; 16], 16).is_err());
+        // assert!(unpad(b"ICE ICE BABY\x03\x02\x01", 16).is_ok());
     }
 
     #[test]

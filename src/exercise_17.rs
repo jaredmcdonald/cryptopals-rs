@@ -8,15 +8,15 @@ use utils::{as_blocks, xor_buffers};
 fn encrypter(key: &[u8], iv: &[u8]) -> Vec<u8> {
     let b64_strings = [
         "MDAwMDAwTm93IHRoYXQgdGhlIHBhcnR5IGlzIGp1bXBpbmc=",
-        "MDAwMDAxV2l0aCB0aGUgYmFzcyBraWNrZWQgaW4gYW5kIHRoZSBWZWdhJ3MgYXJlIHB1bXBpbic=",
-        "MDAwMDAyUXVpY2sgdG8gdGhlIHBvaW50LCB0byB0aGUgcG9pbnQsIG5vIGZha2luZw==",
-        "MDAwMDAzQ29va2luZyBNQydzIGxpa2UgYSBwb3VuZCBvZiBiYWNvbg==",
-        "MDAwMDA0QnVybmluZyAnZW0sIGlmIHlvdSBhaW4ndCBxdWljayBhbmQgbmltYmxl",
-        "MDAwMDA1SSBnbyBjcmF6eSB3aGVuIEkgaGVhciBhIGN5bWJhbA==",
-        "MDAwMDA2QW5kIGEgaGlnaCBoYXQgd2l0aCBhIHNvdXBlZCB1cCB0ZW1wbw==",
-        "MDAwMDA3SSdtIG9uIGEgcm9sbCwgaXQncyB0aW1lIHRvIGdvIHNvbG8=",
-        "MDAwMDA4b2xsaW4nIGluIG15IGZpdmUgcG9pbnQgb2g=",
-        "MDAwMDA5aXRoIG15IHJhZy10b3AgZG93biBzbyBteSBoYWlyIGNhbiBibG93"
+        // "MDAwMDAxV2l0aCB0aGUgYmFzcyBraWNrZWQgaW4gYW5kIHRoZSBWZWdhJ3MgYXJlIHB1bXBpbic=",
+        // "MDAwMDAyUXVpY2sgdG8gdGhlIHBvaW50LCB0byB0aGUgcG9pbnQsIG5vIGZha2luZw==",
+        // "MDAwMDAzQ29va2luZyBNQydzIGxpa2UgYSBwb3VuZCBvZiBiYWNvbg==",
+        // "MDAwMDA0QnVybmluZyAnZW0sIGlmIHlvdSBhaW4ndCBxdWljayBhbmQgbmltYmxl",
+        // "MDAwMDA1SSBnbyBjcmF6eSB3aGVuIEkgaGVhciBhIGN5bWJhbA==",
+        // "MDAwMDA2QW5kIGEgaGlnaCBoYXQgd2l0aCBhIHNvdXBlZCB1cCB0ZW1wbw==",
+        // "MDAwMDA3SSdtIG9uIGEgcm9sbCwgaXQncyB0aW1lIHRvIGdvIHNvbG8=",
+        // "MDAwMDA4b2xsaW4nIGluIG15IGZpdmUgcG9pbnQgb2g=",
+        // "MDAwMDA5aXRoIG15IHJhZy10b3AgZG93biBzbyBteSBoYWlyIGNhbiBibG93"
     ];
     let plaintext = base64_decode(thread_rng().choose(&b64_strings).unwrap()).unwrap();
     println!("expected: {}", plaintext.iter().map(|b| *b as char).collect::<String>());
@@ -36,16 +36,12 @@ fn decrypt_block(
         padding_mask.extend(vec![padding_byte as u8; padding_byte]);
         let base_iv = xor_buffers(&xor_buffers(previous_block, &padding_mask), &decoded);
 
-        for byte in 0x0..0xff { // why do i have to skip 1? skipping 0 makes sense for the last block
-            // if byte == padding_byte as u8 { continue; }
+        for byte in 0x0..0xff {
             let mut manipulated_iv = base_iv.clone();
             manipulated_iv[target_byte_index] ^= byte;
-
+            
             if padding_oracle(&manipulated_iv, block) {
                 decoded[target_byte_index] = byte;
-                // why is this necessary? we should really only find one per loop, right?
-                // i get that we should break to prevent unnecessary iterations, but without
-                // it finds bad byte immediately after it finds the "correct" one
                 break;
             }
         }
