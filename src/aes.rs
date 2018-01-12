@@ -1,6 +1,7 @@
 use openssl::symm::{Crypter, Cipher, Mode};
 use utils::{as_blocks, xor_buffers, flatten};
 use pkcs_7::{pad, unpad};
+use byteorder::{LittleEndian, WriteBytesExt};
 
 fn aes_ecb(data: &[u8], key: &[u8], mode: Mode) -> Vec<u8> {
     let cipher = Cipher::aes_128_ecb();
@@ -48,23 +49,31 @@ pub fn encrypt_aes_cbc(plaintext: &[u8], key: &[u8], iv: &[u8]) -> Vec<u8> {
     flatten(&output)
 }
 
-pub fn aes_ctr(text: &[u8], key: &[u8]) -> Vec<u8> {
-    let mut output = Vec::new();
+pub fn aes_ctr(text: &[u8], key: &[u8], nonce: u64) -> Vec<u8> {
+    let mut output = vec![];
     let mut text_iter = text.iter();
-    let mut counter = [0u8; BLOCK_SIZE];
+    let mut counter = 0u64;
+
+    let mut nonce_bytes = vec![];
+    nonce_bytes.write_u64::<LittleEndian>(nonce).unwrap();
+
     loop {
         let block_ish: Vec<u8> = text_iter.by_ref().take(BLOCK_SIZE).map(|b| *b).collect();
         let last_iter = block_ish.len() < BLOCK_SIZE;
 
-        let keystream = encrypt_aes_ecb(&counter, key);
-        output.extend(xor_buffers(&block_ish, &keystream));
+        let mut keystream = nonce_bytes.clone();
+        let mut counter_bytes = vec![];
+        counter_bytes.write_u64::<LittleEndian>(counter).unwrap();
+        keystream.extend(&counter_bytes);
+
+        let keystream_enc = encrypt_aes_ecb(&keystream, key);
+        output.extend(xor_buffers(&block_ish, &keystream_enc));
 
         if last_iter {
             break;
         }
 
-        // this will do for now but obviously need to figure out why this byte
-        counter[8] += 1;
+        counter += 1;
     }
     output
 }

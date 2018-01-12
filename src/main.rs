@@ -1,6 +1,7 @@
 extern crate base64;
 extern crate openssl;
 extern crate rand;
+extern crate byteorder;
 
 // mod exercise_01;
 mod exercise_02;

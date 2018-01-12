@@ -8,3 +8,4 @@ publish = false
 base64 = "0.6.0"
 openssl = "0.9.19"
 rand = "0.3.16"
+byteorder = "1"
