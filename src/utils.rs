@@ -26,7 +26,7 @@ pub fn decode_base64_lines(lines: &Vec<String>) -> Vec<Vec<u8>> {
 }
 
 pub fn xor_buffers(a: &[u8], b: &[u8]) -> Vec<u8> {
-    assert!(a.len() == b.len(), "can't xor buffers of unequal length: {:?} {:?}", a, b);
+    assert!(a.len() <= b.len(), "xor_buffers: second buffer must be at least as long as first: {:?} {:?}", a, b);
     // is there a way to just map this? how to access the byte in b, since map fn doesn't get index?
     let mut xored = Vec::new();
     for i in 0..a.len() {

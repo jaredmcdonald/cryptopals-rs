@@ -19,6 +19,7 @@ mod exercise_14;
 mod exercise_15;
 mod exercise_16;
 mod exercise_17;
+mod exercise_18;
 
 mod edit_distance;
 mod ascii;
@@ -51,6 +52,7 @@ use exercise_14::run_14;
 use exercise_15::run_15;
 use exercise_16::run_16;
 use exercise_17::run_17;
+use exercise_18::run_18;
 
 fn main() {
     if let Some(which_exercise) = args().nth(1) {
@@ -72,6 +74,7 @@ fn main() {
             Ok(15) => run_15(),
             Ok(16) => run_16(),
             Ok(17) => run_17(),
+            Ok(18) => run_18(),
             _ => println!("no such exercise"),
         };
     } else {

@@ -48,6 +48,27 @@ pub fn encrypt_aes_cbc(plaintext: &[u8], key: &[u8], iv: &[u8]) -> Vec<u8> {
     flatten(&output)
 }
 
+pub fn aes_ctr(text: &[u8], key: &[u8]) -> Vec<u8> {
+    let mut output = Vec::new();
+    let mut text_iter = text.iter();
+    let mut counter = [0u8; BLOCK_SIZE];
+    loop {
+        let block_ish: Vec<u8> = text_iter.by_ref().take(BLOCK_SIZE).map(|b| *b).collect();
+        let last_iter = block_ish.len() < BLOCK_SIZE;
+
+        let keystream = encrypt_aes_ecb(&counter, key);
+        output.extend(xor_buffers(&block_ish, &keystream));
+
+        if last_iter {
+            break;
+        }
+
+        // this will do for now but obviously need to figure out why this byte
+        counter[8] += 1;
+    }
+    output
+}
+
 pub fn decrypt_aes_ecb(ciphertext: &[u8], key: &[u8]) -> Vec<u8> {
     aes_ecb(ciphertext, key, Mode::Decrypt)
 }
