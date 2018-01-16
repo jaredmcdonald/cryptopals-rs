@@ -1,5 +1,5 @@
 use aes::{encrypt_aes_cbc, decrypt_aes_cbc, BLOCK_SIZE};
-use aes_oracles::random_bytes;
+use utils::random_bytes;
 use utils::xor_buffers;
 use pkcs_7::pad;
 use ascii::bytes_to_ascii_string;

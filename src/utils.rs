@@ -1,4 +1,13 @@
 use base64::decode;
+use rand::random;
+
+pub fn random_bytes(n: usize) -> Vec<u8> {
+    let mut output = Vec::new();
+    for _ in 0..n {
+        output.push(random::<u8>());
+    }
+    output
+}
 
 pub fn as_blocks(bytes: &[u8], block_size: usize) -> Vec<Vec<u8>> {
     let mut blocks = Vec::new();

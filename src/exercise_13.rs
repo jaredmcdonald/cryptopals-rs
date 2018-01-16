@@ -1,6 +1,6 @@
 use ascii::bytes_to_ascii_string;
 use std::collections::HashMap;
-use aes_oracles::random_bytes;
+use utils::random_bytes;
 use aes::{encrypt_aes_ecb_padded, decrypt_aes_ecb_padded, BLOCK_SIZE};
 
 fn parse(s: &str) -> HashMap<&str, String> {

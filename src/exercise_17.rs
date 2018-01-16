@@ -1,9 +1,8 @@
 use rand::{Rng, thread_rng};
 use base64::decode as base64_decode;
-use aes_oracles::random_bytes;
 use pkcs_7::{pad, unpad};
 use aes::{encrypt_aes_cbc, decrypt_aes_cbc, BLOCK_SIZE};
-use utils::{as_blocks, xor_buffers};
+use utils::{as_blocks, xor_buffers, random_bytes};
 
 fn encrypter(key: &[u8], iv: &[u8]) -> Vec<u8> {
     let b64_strings = [
