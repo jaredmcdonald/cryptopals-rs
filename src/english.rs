@@ -17,7 +17,7 @@ const ASCII_LOWERCASE_Z: u8 = 0x7a;
 const ASCII_UPPERCASE_A: u8 = 0x41;
 const ASCII_UPPERCASE_Z: u8 = 0x5a;
 
-fn score_bytes(bytes: &Vec<u8>) -> f64 {
+pub fn score_bytes(bytes: &Vec<u8>) -> f64 {
     let mut score = 0;
     for byte in bytes {
         if *byte == ASCII_SPACE || (
