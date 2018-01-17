@@ -35,14 +35,14 @@ impl MersenneTwister {
 
         for i in 1..N {
             let prev = self.state[i - 1];
-            let mut n = F.wrapping_mul(prev ^ (prev >> (W - 2)) + i as u32);
-            n &= D; // can't find this in the wikipedia pseudocode but it's in the python impl :/
+            let n = F.wrapping_mul(prev ^ (prev >> (W - 2))) + i as u32;
             self.state.push(n);
         }
+        println!("{:?}", self.state);
     }
 }
 
 pub fn run_21() {
     let mut rng = MersenneTwister::new();
-    rng.seed(100);
+    rng.seed(1);
 }
