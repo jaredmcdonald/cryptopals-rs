@@ -50,13 +50,17 @@ pub fn run_19() {
     let plaintexts = base64_plaintexts.iter().map(|pt| decode(pt).unwrap());
 
     let key = random_bytes(BLOCK_SIZE);
+
     let ciphertexts = plaintexts.map(|pt| aes_ctr(&pt, &key, 0)).collect::<Vec<Vec<u8>>>();
+    let longest_ciphertext = ciphertexts.iter().map(|ct| ct.len()).max().unwrap();
 
     let mut keystream = vec![];
-    for ct_index in 0..16 {
+    for ct_index in 0..longest_ciphertext {
         let mut ciphertext_bytes_at_index = vec![];
-        for ciphertext in ciphertexts.clone() { // todo how can i just use a reference so that the loop doesn't consume this?
-            ciphertext_bytes_at_index.push(ciphertext[ct_index]);
+        for ciphertext in &ciphertexts {
+            if let Some(ct_byte) = ciphertext.iter().nth(ct_index) {
+                ciphertext_bytes_at_index.push(*ct_byte);
+            }
         }
 
         let mut best_score = 0f64;
@@ -74,10 +78,11 @@ pub fn run_19() {
         println!("best_score {}, best_byte {}", best_score, best_byte);
     }
 
-    for ciphertext in ciphertexts {
+    for ciphertext in &ciphertexts {
         println!("{}",
-            xor_buffers(&ciphertext[0..16], &keystream)
-                .iter().map(|b| *b as char).collect::<String>());
+            xor_buffers(&ciphertext, &keystream)
+                .iter()
+                .map(|b| *b as char)
+                .collect::<String>());
     }
-
 }
