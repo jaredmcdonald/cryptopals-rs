@@ -56,8 +56,8 @@ impl MersenneTwister {
 
     fn generate(&mut self) {
         for i in 0..N {
-            let mut n = self.state[i] & 0x80000000;    // wat is this number?
-            n += self.state[(i + 1) % N] & 0x7fffffff; // and this one?
+            let mut n = self.state[i] & 0x80000000;    // lower R bits (i think?)
+            n += self.state[(i + 1) % N] & 0x7fffffff; // upper W-2 bits (again... idk)
             self.state[i] = self.state[(i + M) % N] ^ (n >> 1);
             if n % 2 != 0 {
                 self.state[i] ^= A;
