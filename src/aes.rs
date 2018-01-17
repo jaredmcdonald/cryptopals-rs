@@ -102,8 +102,8 @@ mod tests {
     fn ecb_sanity_check() {
         // ... i guess this is working correctly?
         // https://github.com/sfackler/rust-openssl/issues/40#issuecomment-269417798
-        let plaintext = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA".as_bytes();
-        let key = "BBBBBBBBBBBBBBBB".as_bytes();
+        let plaintext = b"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        let key = b"BBBBBBBBBBBBBBBB";
         let ciphertext = encrypt_aes_ecb(plaintext, key);
         let decrypted = decrypt_aes_ecb(&ciphertext, key);
         assert_eq!(decrypted[..plaintext.len()], *plaintext); // eh... unpad?
@@ -111,11 +111,21 @@ mod tests {
 
     #[test]
     fn cbc_sanity_check() {
-        let plaintext = "ABABABABABAXAXAAXAADAADAADAACAACACACACACACACACAC".as_bytes();
-        let key = "BBBBBBBBBBBBBBBB".as_bytes();
-        let iv = "CCCCCCCCCCCCCCCC".as_bytes();
-        let ciphertext = encrypt_aes_cbc(plaintext, key, &iv);
-        let decrypted = decrypt_aes_cbc(&ciphertext, key, &iv);
+        let plaintext = b"ABABABABABAXAXAAXAADAADAADAACAACACACACACACACACAC";
+        let key = b"BBBBBBBBBBBBBBBB";
+        let iv = b"CCCCCCCCCCCCCCCC";
+        let ciphertext = encrypt_aes_cbc(plaintext, key, iv);
+        let decrypted = decrypt_aes_cbc(&ciphertext, key, iv);
+        assert_eq!(decrypted, plaintext.to_vec());
+    }
+
+    #[test]
+    fn ctr_sanity_check() {
+        let plaintext = b"abc123 not an even multiple of sixteen bytes";
+        let key = b"YELLOW SUBMARINE";
+        let nonce = 12345;
+        let ciphertext = aes_ctr(plaintext, key, nonce);
+        let decrypted = aes_ctr(&ciphertext, key, nonce);
         assert_eq!(decrypted, plaintext.to_vec());
     }
 }
