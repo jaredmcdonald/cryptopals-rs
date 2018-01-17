@@ -6,7 +6,6 @@ const M: usize = 397;
 // const R: usize = 31;
 const A: u32 = 0x9908b0df;
 const U: u32 = 11;
-const D: u32 = 0xffffffff;
 const S: u32 = 7;
 const B: u32 = 0x9d2c5680;
 const T: u32 = 15;
