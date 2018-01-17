@@ -1,7 +1,7 @@
 use base64::decode;
 use aes::{aes_ctr, BLOCK_SIZE};
 use utils::{random_bytes, xor_buffers};
-use english::score_bytes;
+use break_aes_ctr::break_fixed_nonce_aes_ctr;
 
 pub fn run_19() {
     let base64_plaintexts = [
@@ -51,32 +51,17 @@ pub fn run_19() {
 
     let key = random_bytes(BLOCK_SIZE);
 
-    let ciphertexts = plaintexts.map(|pt| aes_ctr(&pt, &key, 0)).collect::<Vec<Vec<u8>>>();
-    let longest_ciphertext = ciphertexts.iter().map(|ct| ct.len()).max().unwrap();
-
-    let mut keystream = vec![];
-    for ct_index in 0..longest_ciphertext {
-        let mut ciphertext_bytes_at_index = vec![];
-        for ciphertext in &ciphertexts {
-            if let Some(ct_byte) = ciphertext.iter().nth(ct_index) {
-                ciphertext_bytes_at_index.push(*ct_byte);
-            }
-        }
-
-        let mut best_score = 0f64;
-        let mut best_byte = 0u8;
-
-        for xor_byte in 0..0xff {
-            let xored = ciphertext_bytes_at_index.iter().map(|b| b ^ xor_byte).collect::<Vec<_>>();
-            let score = score_bytes(&xored);
-            if score > best_score {
-                best_score = score;
-                best_byte = xor_byte;
-            }
-        }
-        keystream.push(best_byte);
-        println!("best_score {}, best_byte {}", best_score, best_byte);
+    // uuuugh lifetimes
+    let mut ciphertexts = vec![];
+    for plaintext in plaintexts {
+        ciphertexts.push(aes_ctr(&plaintext, &key, 0));
     }
+    let mut ciphertexts_slice = vec![];
+    for ciphertext in &ciphertexts {
+        ciphertexts_slice.push(ciphertext.as_slice());
+    }
+
+    let keystream = break_fixed_nonce_aes_ctr(ciphertexts_slice.as_slice());
 
     for ciphertext in &ciphertexts {
         println!("{}",

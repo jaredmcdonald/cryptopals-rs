@@ -22,7 +22,9 @@ mod exercise_16;
 mod exercise_17;
 mod exercise_18;
 mod exercise_19;
+mod exercise_20;
 
+mod break_aes_ctr;
 mod edit_distance;
 mod ascii;
 mod english;
@@ -56,6 +58,7 @@ use exercise_16::run_16;
 use exercise_17::run_17;
 use exercise_18::run_18;
 use exercise_19::run_19;
+use exercise_20::run_20;
 
 
 fn main() {
@@ -80,6 +83,7 @@ fn main() {
             Ok(17) => run_17(),
             Ok(18) => run_18(),
             Ok(19) => run_19(),
+            Ok(20) => run_20(),
             _ => println!("no such exercise"),
         };
     } else {
