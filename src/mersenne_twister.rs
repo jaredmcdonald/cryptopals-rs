@@ -32,7 +32,7 @@ impl MersenneTwister {
 
         for i in 1..N {
             let prev = self.state[i - 1];
-            let n = F.wrapping_mul(prev ^ (prev >> (W - 2))) + i as u32;
+            let n = F.wrapping_mul(prev ^ (prev >> (W - 2))).wrapping_add(i as u32);
             self.state.push(n);
         }
     }
