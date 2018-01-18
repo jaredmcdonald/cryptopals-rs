@@ -26,6 +26,7 @@ mod exercise_20;
 mod exercise_21;
 mod exercise_22;
 
+mod mersenne_twister;
 mod break_aes_ctr;
 mod edit_distance;
 mod ascii;
