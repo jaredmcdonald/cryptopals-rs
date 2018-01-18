@@ -14,8 +14,38 @@ const F: u32 = 1812433253;
 // https://en.wikipedia.org/wiki/Mersenne_Twister
 // https://github.com/nryoung/algorithms/blob/master/algorithms/random/mersenne_twister.py
 pub struct MersenneTwister {
-    state: Vec<u32>,
-    index: usize,
+    pub state: Vec<u32>,
+    pub index: usize,
+}
+
+fn temper(x: u32) -> u32 {
+    let mut y = x ^ x >> U;
+    y ^= (y << S) & B;
+    y ^= (y << T) & C;
+    y ^= y >> L;
+    y
+}
+
+// https://www.randombit.net/bitbashing/2009/07/21/inverting_mt19937_tempering.html
+pub fn untemper(x: u32) -> u32 {
+    // undo `y ^= y >> L`
+    let mut y = x ^ x >> L;
+
+    // undo `y ^= (y << T) & C`
+    y ^= (y << T) & C;
+
+    // undo `y ^= (y << S) & B`
+    y ^= (y << S) & 0x1680; // & mask shifts 7 bits each time, or something
+    y ^= (y << S) & 0xc4000;
+    y ^= (y << S) & 0xd200000;
+    y ^= (y << S) & 0x90000000;
+    y ^= (y >> U) & 0xffc00000;
+    y ^= (y >> U) & 0x3ff800;
+
+    // // undo `y ^= y >> U`
+    y ^= (y >> U) & 0x7ff; // ehh what's the `& 0x7ff` for?
+
+    y
 }
 
 impl MersenneTwister {
@@ -41,14 +71,9 @@ impl MersenneTwister {
         if self.index == 0 {
             self.generate();
         }
-        let mut y = self.state[self.index];
-        y ^= y >> U;
-        y ^= (y << S) & B;
-        y ^= (y << T) & C;
-        y ^= y >> L;
-
+        let y = self.state[self.index];
         self.index = (self.index + 1) % N;
-        y
+        temper(y)
     }
 
     // useful for e.g. 3.23 where we need to splice in a faked state array
@@ -93,5 +118,11 @@ mod tests {
         for _ in 0..10 {
             assert_ne!(prng1.rand(), prng2.rand());
         }
+    }
+
+    #[test]
+    fn test_untemper() {
+        let n = 1234567;
+        assert_eq!(untemper(temper(n)), n);
     }
 }
