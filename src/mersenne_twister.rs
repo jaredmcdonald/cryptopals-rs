@@ -51,6 +51,11 @@ impl MersenneTwister {
         y
     }
 
+    // useful for e.g. 3.23 where we need to splice in a faked state array
+    pub fn set_state(&mut self, state: Vec<u32>) {
+        self.state = state;
+    }
+
     fn generate(&mut self) {
         for i in 0..N {
             let mut n = self.state[i] & 0x80000000;    // lower R bits (i think?)
@@ -59,6 +64,34 @@ impl MersenneTwister {
             if n % 2 != 0 {
                 self.state[i] ^= A;
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_same_seed() {
+        let seed = 123456;
+        let mut prng1 = MersenneTwister::new();
+        let mut prng2 = MersenneTwister::new();
+        prng1.seed(seed);
+        prng2.seed(seed);
+        for _ in 0..10 {
+            assert_eq!(prng1.rand(), prng2.rand());
+        }
+    }
+
+    #[test]
+    fn test_different_seed() {
+        let mut prng1 = MersenneTwister::new();
+        let mut prng2 = MersenneTwister::new();
+        prng1.seed(1234);
+        prng2.seed(5678);
+        for _ in 0..10 {
+            assert_ne!(prng1.rand(), prng2.rand());
         }
     }
 }
