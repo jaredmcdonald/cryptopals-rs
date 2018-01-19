@@ -48,6 +48,18 @@ pub fn untemper(x: u32) -> u32 {
     y
 }
 
+pub fn mt19337_stream_cipher(seed: u16, text: &[u8]) -> Vec<u8> {
+    let mut prng = MersenneTwister::new();
+    prng.seed(seed as u32);
+
+    let mut output = vec![];
+    let mut text_iter = text.iter();
+    while let Some(byte) = text_iter.next() {
+        output.push(byte ^ prng.rand() as u8);
+    }
+    output
+}
+
 impl MersenneTwister {
     pub fn new() -> MersenneTwister {
         MersenneTwister {
@@ -124,5 +136,16 @@ mod tests {
     fn test_untemper() {
         let n = 1234567;
         assert_eq!(untemper(temper(n)), n);
+    }
+
+    #[test]
+    fn test_mt19337_cipher() {
+        let seed = 1234u16;
+        let plaintext = b"abcdefghijklmnopqrstuvwxyz";
+
+        let ciphertext = mt19337_stream_cipher(seed, plaintext);
+        let recovered_plaintext = mt19337_stream_cipher(seed, &ciphertext);
+
+        assert_eq!(plaintext.to_vec(), recovered_plaintext);
     }
 }
