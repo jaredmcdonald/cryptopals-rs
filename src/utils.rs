@@ -1,9 +1,18 @@
 use base64::decode;
-use rand::random;
+use rand::{random, thread_rng, Rng};
 
 pub fn random_bytes(n: usize) -> Vec<u8> {
     let mut output = Vec::new();
     for _ in 0..n {
+        output.push(random::<u8>());
+    }
+    output
+}
+
+pub fn random_bytes_between(start: usize, end: usize) -> Vec<u8> {
+    let num_extra_bytes: usize = thread_rng().gen_range(start, end);
+    let mut output = Vec::new();
+    for _ in 0..num_extra_bytes {
         output.push(random::<u8>());
     }
     output

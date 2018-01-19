@@ -1,8 +1,8 @@
 use std::collections::HashSet;
-use rand::{random, thread_rng, Rng};
+use rand::random;
 use base64::decode as base64_decode;
 use aes::{BLOCK_SIZE, encrypt_aes_cbc, encrypt_aes_ecb_padded};
-use utils::random_bytes;
+use utils::{random_bytes, random_bytes_between};
 
 pub type Encrypter<'a> = Box<Fn(&[u8]) -> Vec<u8> + 'a>;
 
@@ -29,15 +29,6 @@ pub fn detection_oracle(encrypter: &Encrypter) -> AesEncryptionMode {
     } else {
         AesEncryptionMode::CBC
     }
-}
-
-fn random_bytes_between(start: usize, end: usize) -> Vec<u8> {
-    let num_extra_bytes: usize = thread_rng().gen_range(start, end);
-    let mut output = Vec::new();
-    for _ in 0..num_extra_bytes {
-        output.push(random::<u8>());
-    }
-    output
 }
 
 fn random_bytes_around(bytes: &[u8]) -> Vec<u8> {
