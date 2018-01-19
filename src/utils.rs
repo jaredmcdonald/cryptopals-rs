@@ -1,5 +1,12 @@
 use base64::decode;
 use rand::{random, thread_rng, Rng};
+use std::time::{SystemTime, UNIX_EPOCH};
+
+pub fn now() -> u32 {
+    let start = SystemTime::now();
+    let since_the_epoch = start.duration_since(UNIX_EPOCH).unwrap();
+    since_the_epoch.as_secs() as u32
+}
 
 pub fn random_bytes(n: usize) -> Vec<u8> {
     let mut output = Vec::new();

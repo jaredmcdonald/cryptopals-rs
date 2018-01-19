@@ -1,12 +1,6 @@
-use std::time::{SystemTime, UNIX_EPOCH};
 use mersenne_twister::MersenneTwister;
 use rand::{Rng, thread_rng};
-
-fn now() -> u32 {
-    let start = SystemTime::now();
-    let since_the_epoch = start.duration_since(UNIX_EPOCH).unwrap();
-    since_the_epoch.as_secs() as u32
-}
+use utils::now;
 
 fn prng_oracle() -> u32 {
     let unix_timestamp = now();
