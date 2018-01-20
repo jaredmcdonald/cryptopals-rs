@@ -4,7 +4,7 @@ use utils::xor_buffers;
 use pkcs_7::pad;
 use ascii::bytes_to_ascii_string;
 
-fn generate_profile(content: &[u8]) -> Vec<u8> {
+pub fn generate_profile(content: &[u8]) -> Vec<u8> {
     format!("comment1=cooking%20MCs;userdata={};comment2=%20like%20a%20pound%20of%20bacon",
         bytes_to_ascii_string(content).replace(";", "%3B").replace("=", "%3D").replace(" ", "%20")
     ).as_bytes().to_vec()
