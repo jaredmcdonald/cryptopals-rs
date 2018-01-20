@@ -13,7 +13,7 @@ fn decrypt_byte(
     let short_block = vec![0x0; target_index];
     let mut partially_decoded = short_block.clone();
     partially_decoded.extend(decoded_bytes);
-    for byte in 0..0xff {
+    for byte in 0..=<u8>::max_value() {
         let mut input = partially_decoded.clone();
         input.push(byte);
         let first_output_block = encrypter(input.as_slice())[..len_with_padding].to_vec();

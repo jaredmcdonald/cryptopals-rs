@@ -1,9 +1,10 @@
 use read_file::strings_from_filename;
 use utils::{flatten, decode_base64_lines, random_bytes};
 use aes::{decrypt_aes_ecb, aes_ctr, BLOCK_SIZE};
+use std::io::{stderr, Write};
 
 pub fn run_25() {
-    // same as 1.7
+    // same as 1.7, recover the plaintext to re-encrypt w/ CTR
     let ecb_key = "YELLOW SUBMARINE".as_bytes();
     let ecb_ciphertext = flatten(&decode_base64_lines(&strings_from_filename("25.txt")));
     let plaintext = decrypt_aes_ecb(&ecb_ciphertext, ecb_key);
@@ -22,14 +23,12 @@ pub fn run_25() {
 
     let mut cracked_plaintext = vec![];
     for (index, _) in ctr_ciphertext.iter().enumerate() {
-        for potential_byte_u16 in 0..256u16 {
-            // need to do this until inclusive ranges land
-            // https://github.com/rust-lang/rust/issues/28237
-            let potential_byte = potential_byte_u16 as u8;
-
+        for potential_byte in 0..=<u8>::max_value() {
             let edited = edit(&ctr_ciphertext[..index + 1], index, &[potential_byte]);
             if edited[index] == ctr_ciphertext[index] {
                 cracked_plaintext.push(potential_byte);
+                eprint!("{}", potential_byte as char);
+                stderr().flush(); // otherwise it's line-buffered
                 break;
             }
         }

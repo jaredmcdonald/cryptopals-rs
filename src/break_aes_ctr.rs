@@ -15,7 +15,7 @@ pub fn break_fixed_nonce_aes_ctr(ciphertexts: &[&[u8]]) -> Vec<u8> { // return t
         let mut best_score = 0f64;
         let mut best_byte = 0u8;
 
-        for xor_byte in 0..0xff {
+        for xor_byte in 0..=<u8>::max_value() {
             let xored = ciphertext_bytes_at_index.iter().map(|b| b ^ xor_byte).collect::<Vec<_>>();
             let score = score_bytes(&xored);
             if score > best_score {

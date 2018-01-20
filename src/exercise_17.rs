@@ -37,7 +37,7 @@ fn decrypt_block(
         padding_mask.extend(vec![padding_byte as u8; padding_byte]);
         let base_iv = xor_buffers(&xor_buffers(previous_block, &padding_mask), &decoded);
 
-        for byte in 0x0..0xff {
+        for byte in 0x0..=<u8>::max_value() {
             let mut manipulated_iv = base_iv.clone();
             manipulated_iv[target_byte_index] ^= byte;
 

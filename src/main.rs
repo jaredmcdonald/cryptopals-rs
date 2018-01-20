@@ -1,3 +1,5 @@
+#![feature(inclusive_range_syntax)]
+
 extern crate base64;
 extern crate openssl;
 extern crate rand;
