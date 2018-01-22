@@ -31,6 +31,7 @@ mod exercise_23;
 mod exercise_24;
 mod exercise_25;
 mod exercise_26;
+mod exercise_27;
 
 mod mersenne_twister;
 mod break_aes_ctr;
@@ -74,6 +75,7 @@ use exercise_23::run_23;
 use exercise_24::run_24;
 use exercise_25::run_25;
 use exercise_26::run_26;
+use exercise_27::run_27;
 
 fn main() {
     if let Some(which_exercise) = args().nth(1) {
@@ -104,6 +106,7 @@ fn main() {
             Ok(24) => run_24(),
             Ok(25) => run_25(),
             Ok(26) => run_26(),
+            Ok(27) => run_27(),
             _ => println!("no such exercise"),
         };
     } else {
