@@ -28,7 +28,7 @@ pub fn run_25() {
             if edited[index] == ctr_ciphertext[index] {
                 cracked_plaintext.push(potential_byte);
                 eprint!("{}", potential_byte as char);
-                stderr().flush(); // otherwise it's line-buffered
+                stderr().flush().unwrap(); // otherwise it's line-buffered
                 break;
             }
         }
