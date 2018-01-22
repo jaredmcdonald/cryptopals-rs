@@ -14,7 +14,6 @@ fn decrypt_cbc_iv_key(key: &[u8], ciphertext: &[u8]) -> Result<Vec<u8>, Vec<u8>>
     }
 }
 
-// how am i supposed to use this? on encryption or decryption?
 fn check_plaintext(plaintext: &[u8]) -> bool {
     plaintext.iter().all(|b| *b < 128)
 }
