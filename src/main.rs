@@ -4,6 +4,7 @@ extern crate base64;
 extern crate openssl;
 extern crate rand;
 extern crate byteorder;
+extern crate sha1;
 
 // mod exercise_01;
 mod exercise_02;
@@ -32,6 +33,7 @@ mod exercise_24;
 mod exercise_25;
 mod exercise_26;
 mod exercise_27;
+mod exercise_28;
 
 mod mersenne_twister;
 mod break_aes_ctr;
@@ -76,6 +78,7 @@ use exercise_24::run_24;
 use exercise_25::run_25;
 use exercise_26::run_26;
 use exercise_27::run_27;
+use exercise_28::run_28;
 
 fn main() {
     if let Some(which_exercise) = args().nth(1) {
@@ -107,6 +110,7 @@ fn main() {
             Ok(25) => run_25(),
             Ok(26) => run_26(),
             Ok(27) => run_27(),
+            Ok(28) => run_28(),
             _ => println!("no such exercise"),
         };
     } else {
